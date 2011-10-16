@@ -1,0 +1,21 @@
+[user]
+	name = Manuel Gómez
+	email = targen@gmail.com
+[github]
+	user = Targen
+	token = 
+[diff]
+	tool = vimdiff
+[difftool]
+	prompt = false
+[alias]
+	d = difftool
+	vimdiff = difftool -y -t vimdiff
+[merge]
+	tool = vimdiff
+[core]
+	editor = vim
+[color]
+	diff = auto
+	status = auto
+	branch = auto
