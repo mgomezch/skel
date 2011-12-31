@@ -11,8 +11,6 @@ shopt -s histappend
 HISTSIZE=8192
 HISTFILESIZE=32768
 
-export MPD_HOST=iguana@localhost
-
 shopt -s checkwinsize
 
 [ -x /usr/bin/lesspipe ] && eval "$(SHELL=/bin/sh lesspipe)"

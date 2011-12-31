@@ -43,22 +43,40 @@ au BufWinEnter * call WhiteSpaceColorCallback()
 " Options
 set cursorline
 set hls
-set hi=8192
+set history=8192
 set number
 set nobackup
 set undolevels=1024
 set showmatch
+set showcmd
+set shiftwidth=8
+set tabstop=8
+set softtabstop=0
+set expandtab
+set notimeout
+set ttimeout
+
+
 
 " Fn mappings
 map <F2>  :set cursorline!<CR>
 map <F3>  :set cursorcolumn!<CR>
 map <F4>  :call ToggleWhiteSpaceColor()<CR>
 map <F5>  :set wrap!<CR>
+map <F6>  :set scrollbind!<CR>
+map <F10> `[v`]
 map <F11> @@
 map <F12> @:
+
 
 " Other mappings
 map <Leader>< :prev<CR>
 map <Leader>> :next<CR>
 map <Leader>w< :wprev<CR>
 map <Leader>w> :wnext<CR>
+
+
+
+" Thrift stuff
+au BufRead,BufNewFile *.thrift set filetype=thrift
+au! Syntax thrift source ~/.vim/thrift.vim

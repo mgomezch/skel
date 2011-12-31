@@ -1,18 +1,18 @@
 [user]
-	name = Manuel Gómez
-	email = targen@gmail.com
+	name = 
+	email = 
 [github]
-	user = Targen
+	user = 
 	token = 
 [diff]
 	tool = vimdiff
 [difftool]
 	prompt = false
 [alias]
-	d = difftool
 	vimdiff = difftool -y -t vimdiff
 [merge]
 	tool = vimdiff
+	conflictstyle = diff3
 [core]
 	editor = vim
 [color]
