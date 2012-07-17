@@ -41,7 +41,6 @@ au BufWinEnter * call WhiteSpaceColorCallback()
 
 
 " Options
-set cursorline
 set hls
 set history=8192
 set number
@@ -55,6 +54,13 @@ set softtabstop=0
 set expandtab
 set notimeout
 set ttimeout
+set cryptmethod=blowfish
+
+set keymap=greek_utf-8
+set iminsert=0
+set imsearch=0
+
+let g:netrw_altv = 1
 
 
 
@@ -63,7 +69,8 @@ map <F2>  :set cursorline!<CR>
 map <F3>  :set cursorcolumn!<CR>
 map <F4>  :call ToggleWhiteSpaceColor()<CR>
 map <F5>  :set wrap!<CR>
-map <F6>  :set scrollbind!<CR>
+map <F6>  :if exists("g:syntax_on") <Bar> syntax off <Bar> else <Bar> syntax enable <Bar> endif<CR>
+map <F7>  :set scrollbind!<CR>
 map <F10> `[v`]
 map <F11> @@
 map <F12> @:
@@ -80,3 +87,7 @@ map <Leader>w> :wnext<CR>
 " Thrift stuff
 au BufRead,BufNewFile *.thrift set filetype=thrift
 au! Syntax thrift source ~/.vim/thrift.vim
+
+
+
+runtime ftplugin/man.vim

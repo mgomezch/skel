@@ -5,7 +5,6 @@ if [ -f ${HOME}/.termcap ]; then
     export TERMCAP
 fi
 
-PATH="$PATH":/usr/bin/mh:/var/lib/gems/1.8/bin
 HISTCONTROL=ignoreboth:erasedups
 shopt -s histappend
 HISTSIZE=8192
@@ -53,4 +52,42 @@ if [ -f /etc/bash_completion ] && ! shopt -oq posix; then
     . /etc/bash_completion
 fi
 
-function now() { date +%Y%m%d%H%M%S; }
+newpaths=()
+
+# add cabal-install’s bin to PATH
+if [ -d "$HOME/.cabal/bin" ] ; then
+        newpaths+=("$HOME/.cabal/bin")
+fi
+
+# add ghc-7.4.2’s bin to PATH
+if [ -d "/opt/ghc/7.4.2/bin" ] ; then
+        newpaths+=("/opt/ghc/7.4.2/bin")
+fi
+
+# set PATH so it includes user's private bin if it exists
+if [ -d "$HOME/bin" ] ; then
+        newpaths+=("$HOME/bin")
+fi
+
+# MPD (music player dæmon)
+export MPD_HOST=iguana@localhost
+
+# Go programming language
+export GOBIN="$HOME/.go/src/bin"
+export GOOS=linux
+export GOARCH=386
+export GOROOT="$HOME/.go/src"
+newpaths+=("$GOBIN")
+newpaths+=("$HOME/.go/src/bin")
+
+# New MH message system
+newpaths+=("/usr/bin/mh")
+
+# Ruby 1.8 Gems
+newpaths+=("/var/lib/gems/1.8/bin")
+
+export PAGER="less -S"
+export EDITOR="vim"
+export BC_LINE_LENGTH=0
+
+export PATH="$(IFS=":"; printf "%s" "${newpaths[*]}"):$PATH"

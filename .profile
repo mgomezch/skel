@@ -8,17 +8,10 @@
 # for ssh logins, install and configure the libpam-umask package.
 #umask 022
 
-export PAGER="less -S"
-
 # if running bash
 if [ -n "$BASH_VERSION" ]; then
-    # include .bashrc if it exists
-    if [ -f "$HOME/.bashrc" ]; then
-	. "$HOME/.bashrc"
-    fi
-fi
-
-# set PATH so it includes user's private bin if it exists
-if [ -d "$HOME/bin" ] ; then
-    export PATH="$HOME/bin:$PATH"
+        # include .bashrc if it exists
+        if [ -f "$HOME/.bashrc" ]; then
+                . "$HOME/.bashrc"
+        fi
 fi

@@ -1,7 +1,7 @@
-set from      = "targen@gmail.com"
-set realname  = "Manuel Gómez"
+set from      = ""
+set realname  = ""
 
-set imap_user = "targen@gmail.com"
+set imap_user = ""
 set imap_pass = ""
 
 set folder    = "imaps://imap.gmail.com:993"
@@ -9,7 +9,7 @@ set spoolfile = "+INBOX"
 set postponed = "+[Gmail]/Drafts"
 set trash     = "imaps://imap.gmail.com/[Gmail]/Trash"
 
-set smtp_url  = "smtp://targen@smtp.gmail.com:587/"
+set smtp_url  = "smtp://@smtp.gmail.com:587/"
 set smtp_pass = ""
 
 set header_cache     = ~/.mutt/cache/headers
