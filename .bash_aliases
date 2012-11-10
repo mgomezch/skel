@@ -6,3 +6,5 @@ alias rm='rm -i'
 alias mv='mv -i'
 alias cp='cp -i'
 alias please='sudo'
+
+alias comprobante='evince ~/stuff/usb/docs/comprobante/2011SD.pdf'
