@@ -6,34 +6,34 @@ hi! link CursorColumn CursorLine
 let g:whiteSpaceColor = 1
 
 function ToggleWhiteSpaceColor()
-        if g:whiteSpaceColor
-                let g:whiteSpaceColor = 0
-        else
-                let g:whiteSpaceColor = 1
-        end
-        call WhiteSpaceColorCallback()
+  if g:whiteSpaceColor
+    let g:whiteSpaceColor = 0
+  else
+    let g:whiteSpaceColor = 1
+  end
+  call WhiteSpaceColorCallback()
 endfunction
 
 function WhiteSpaceColorCallback()
-        if g:whiteSpaceColor
-                if !exists("w:match_WhiteSpaceEol")
-                        let w:match_WhiteSpaceEol = matchadd('WhiteSpaceEol', '\s\+$', -1)
-                end
+  if g:whiteSpaceColor
+    if !exists("w:match_WhiteSpaceEol")
+      let w:match_WhiteSpaceEol = matchadd('WhiteSpaceEol', '\s\+$', -1)
+    end
 
-                if !exists("w:match_Tabs")
-                        let w:match_Tabs = matchadd('Tabs', '\t', -1)
-                end
-        else
-                if exists("w:match_WhiteSpaceEol")
-                        call matchdelete(w:match_WhiteSpaceEol)
-                        unlet w:match_WhiteSpaceEol
-                end
+    if !exists("w:match_Tabs")
+      let w:match_Tabs = matchadd('Tabs', '\t', -1)
+    end
+  else
+    if exists("w:match_WhiteSpaceEol")
+      call matchdelete(w:match_WhiteSpaceEol)
+      unlet w:match_WhiteSpaceEol
+    end
 
-                if exists("w:match_Tabs")
-                        call matchdelete(w:match_Tabs)
-                        unlet w:match_Tabs
-                end
-        end
+    if exists("w:match_Tabs")
+      call matchdelete(w:match_Tabs)
+      unlet w:match_Tabs
+    end
+  end
 endfunction
 
 au BufWinEnter * call WhiteSpaceColorCallback()
@@ -48,7 +48,7 @@ set nobackup
 set undolevels=1024
 set showmatch
 set showcmd
-set shiftwidth=8
+set shiftwidth=2
 set tabstop=8
 set softtabstop=0
 set expandtab
@@ -71,6 +71,7 @@ map <F4>  :call ToggleWhiteSpaceColor()<CR>
 map <F5>  :set wrap!<CR>
 map <F6>  :if exists("g:syntax_on") <Bar> syntax off <Bar> else <Bar> syntax enable <Bar> endif<CR>
 map <F7>  :set scrollbind!<CR>
+map <F8>  :nohl<CR>
 map <F10> `[v`]
 map <F11> @@
 map <F12> @:
