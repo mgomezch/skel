@@ -40,25 +40,49 @@ au BufWinEnter * call WhiteSpaceColorCallback()
 
 
 
-" Options
-set hls
-set history=8192
-set number
-set nobackup
-set undolevels=1024
-set showmatch
-set showcmd
-set shiftwidth=2
-set tabstop=8
-set softtabstop=0
-set expandtab
-set notimeout
-set ttimeout
-set cryptmethod=blowfish
+" Stuff from Ubuntu’s /etc/vim/vimrc
+if has("syntax")
+  syntax on
+endif
 
-set keymap=greek_utf-8
+if has("autocmd")
+  au BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g'\"" | endif
+endif
+
+if has("autocmd")
+  filetype plugin indent on
+endif
+
+
+
+" Options
+set background=dark
+set cryptmethod=blowfish
+set hls
+set incsearch
+set mouse=a
+set nobackup
+set notimeout
+set number
+set showcmd
+set showmatch
+
+set timeout
+set ttimeout
+set timeoutlen=0
+set ttimeoutlen=0
+
+set history=32768
+set undolevels=16384
+
+set expandtab
+set shiftwidth=2
+set softtabstop=0
+set tabstop=8
+
 set iminsert=0
 set imsearch=0
+set keymap=greek_utf-8
 
 let g:netrw_altv = 1
 
@@ -71,7 +95,7 @@ map <F4>  :call ToggleWhiteSpaceColor()<CR>
 map <F5>  :set wrap!<CR>
 map <F6>  :if exists("g:syntax_on") <Bar> syntax off <Bar> else <Bar> syntax enable <Bar> endif<CR>
 map <F7>  :set scrollbind!<CR>
-map <F8>  :nohl<CR>
+map <F8>  :noh<CR>
 map <F10> `[v`]
 map <F11> @@
 map <F12> @:
@@ -86,9 +110,15 @@ map <Leader>w> :wnext<CR>
 
 
 " Thrift stuff
-au BufRead,BufNewFile *.thrift set filetype=thrift
-au! Syntax thrift source ~/.vim/thrift.vim
+"au BufRead,BufNewFile *.thrift set filetype=thrift
+"au! Syntax thrift source ~/.vim/thrift.vim
 
 
 
-runtime ftplugin/man.vim
+"runtime ftplugin/man.vim
+
+"execute pathogen#infect()
+
+
+
+set undodir=~/.vim/undo/
