@@ -9,14 +9,16 @@ fi
 
 
 
+# Prompt
+
 if [ -z "$debian_chroot" ] && [ -r /etc/debian_chroot ]; then
-  debian_chroot=$(cat /etc/debian_chroot)
+  debian_chroot="$(cat /etc/debian_chroot)"
 fi
+
+PROMPT_DIRTRIM=3
 
 if [ -x /usr/bin/tput ] && tput setaf 1 >&/dev/null
 then
-  PROMPT_DIRTRIM=3
-  # PS1='\[\e[01;30m\]\t$(exitcode="$?"; if [[ $exitcode == 0 ]]; then echo "\[\e[32m\] ✔ "; else echo "\[\e[31m\] $exitcode "; fi)\[\e[01;32m\]\u@\h\[\e[01;37m\]:\[\e[00;37m\]$([[ $(git diff --cached --exit-code 2>&1 > /dev/null) ]] && echo -n "\[\e[31m\]" || echo -n "\[\e[33m\]"; [[ $(git status --porcelain 2> /dev/null) != "" ]] || echo -n "\[\e[32m\]"; __git_ps1 "(%s)")\[\e[01;34m\]\w\[\e[00m\]\$ '
   PS1='\[\e[01;30m\]\t $(exitcode="$?"; if [[ $exitcode != 0 ]]; then echo "\[\e[31m\]$exitcode "; fi)\[\e[01;32m\]\u@\h\[\e[01;37m\]:\[\e[00;31m\]$(__git_ps1 "(%s)")\[\e[01;34m\]\w\[\e[00m\]\$ '
 else
   PS1="(\$?) ${debian_chroot:+($debian_chroot)}\u@\h:\w\$ "
@@ -27,18 +29,37 @@ then
   [ -r ~/.dircolors ] && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
 fi
 
-if [ -f ~/.bash_aliases ]
-then
-  . ~/.bash_aliases
-fi
-
-#if [ -f /etc/bash_completion ]
 if [ -f /etc/bash_completion ] && ! shopt -oq posix
 then
   . /etc/bash_completion
 fi
 
 
+
+# General configuration
+
+export LANG='en_US.UTF-8'
+export LC_ALL='en_US.UTF-8'
+export PAGER='less -S'
+export EDITOR='vim'
+export BC_LINE_LENGTH=0
+#export MPD_HOST=@localhost
+#export PGDATA="$HOME/.opt/postgresql/9.2.4/data"
+
+# Bash customization
+
+HISTCONTROL=ignoreboth:erasedups
+HISTSIZE=65535
+HISTFILESIZE=65535
+
+alias ls='ls --color=auto'
+alias grep='grep --color=auto'
+alias fgrep='fgrep --color=auto'
+alias egrep='egrep --color=auto'
+alias rm='rm -i'
+alias mv='mv -i'
+alias cp='cp -i'
+alias please='sudo'
 
 shopt -s                  \
   autocd                  \
@@ -57,48 +78,47 @@ shopt -s                  \
   no_empty_cmd_completion \
   shift_verbose           \
 
-function add_path() { [ -d "$1" ] && newpaths+=($1); }
-
-newpaths=()
-add_path "$HOME/bin"
-#add_path "$HOME/.perl/bin"
-#add_path "$HOME/.perl6/bin"
-#add_path "$HOME/.uhc/bin"
-#add_path "$HOME/.cabal/bin"
-#add_path "/var/local/manuel/haskell/ghc/HEAD/bin"
-#add_path "/var/local/manuel/haskell/lib/ghc-7.4.2-bin/bin"
-#add_path "/var/local/manuel/haskell/ghc/7.4.2-bin/bin"
-#add_path "/var/lib/gems/1.8/bin"
-#add_path "/var/lib/gems/1.9.1/bin"
-#add_path "/usr/bin/mh"
 
 
+# User executable and library paths
+bin_new_paths=(); function bin_add_path() { [ -d "$1" ] && bin_new_paths+=($1); }
+lib_new_paths=(); function lib_add_path() { [ -d "$1" ] && lib_new_paths+=($1); }
+inc_new_paths=(); function inc_add_path() { [ -d "$1" ] && inc_new_paths+=($1); }
 
-# Go programming language
-#export GOBIN="$HOME/.go/src/bin"
-#export GOOS=linux
-#export GOARCH=386
-#export GOROOT="$HOME/.go/src"
-#add_path "$GOBIN"
+# Executable paths
+bin_add_path "$HOME/bin"
+#bin_add_path "$HOME/.cabal/bin"
+#bin_add_path "$HOME/.opt/haskell-platform/2012.4.0.0/bin"
+#bin_add_path "$HOME/.opt/ghc/4.7.2-bin/bin"
+#bin_add_path "$HOME/.opt/postgresql/9.2.4/bin"
+#bin_add_path "$HOME/.opt/vim/7.3/bin"
+#bin_add_path "$HOME/.opt/gcc/bin"
+#bin_add_path "$HOME/perl5/perlbrew/bin"
+#bin_add_path "/var/lib/gems/1.8/bin"
+#bin_add_path "/var/lib/gems/1.9.1/bin"
 
+# Library paths
+#lib_add_path "$HOME/.opt/postgresql/9.2.4/lib"
+#lib_add_path "$HOME/.opt/gcc/lib"
+#lib_add_path "$HOME/.opt/gcc/lib64"
 
-# MPD (music player dæmon)
-#export MPD_HOST=@localhost
+# Include paths
+#inc_add_path "$HOME/.opt/postgresql/9.2.4/include"
 
-
-# General configuration
-export PAGER="less -S"
-export EDITOR="vim"
-export BC_LINE_LENGTH=0
-
-# Bash configuration
-HISTCONTROL=ignoreboth:erasedups
-HISTSIZE=65535
-HISTFILESIZE=65535
-
-
-export PATH="$(IFS=":"; printf "%s" "${newpaths[*]}"):$PATH"
-
-
+export            PATH="$(IFS=':'; printf '%s' "${bin_new_paths[*]}"):$PATH"
+export LD_LIBRARY_PATH="$(IFS=':'; printf '%s' "${lib_new_paths[*]}"):$LD_LIBRARY_PATH"
+export     LD_RUN_PATH="$(IFS=':'; printf '%s' "${lib_new_paths[*]}"):$LD_RUN_PATH"
+export  C_INCLUDE_PATH="$(IFS=':'; printf '%s' "${inc_new_paths[*]}"):$C_INCLUDE_PATH"
 
 #export LD_LIBRARY_PATH="$(ghc-pkg list --simple-output --global | sed -e 's@ @:@g' -e "s@[^:]\+@$HOME/.cabal/lib/i386-linux-ghc-7.7.20130420/&@g"):$(ghc-pkg list --simple-output --global | sed -e 's@ @:@g' -e 's@[^:]\+@/var/local/manuel/haskell/ghc/HEAD/lib/ghc-7.7.20130420/&@g')"
+
+
+
+# Brews
+
+source ~/perl5/perlbrew/etc/bashrc
+
+PATH="$PATH:$HOME/.rvm/bin"
+[[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm"
+
+[[ -s "$HOME/.pythonbrew/etc/bashrc" ]] && source "$HOME/.pythonbrew/etc/bashrc"

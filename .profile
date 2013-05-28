@@ -8,6 +8,15 @@
 # for ssh logins, install and configure the libpam-umask package.
 #umask 022
 
+export BC_LINE_LENGTH=0
+export CHROME_EXTRA_ARGS='--audio-buffer-size=2048'
+export EDITOR='vim'
+export LANG='en_US.UTF-8'
+export LC_ALL='en_US.UTF-8'
+export PAGER='less -S'
+#export MPD_HOST=@localhost
+#export PGDATA="$HOME/.opt/postgresql/9.2.4/data"
+
 # if running bash
 if [ -n "$BASH_VERSION" ]; then
         # include .bashrc if it exists
