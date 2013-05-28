@@ -87,15 +87,13 @@ inc_new_paths=(); function inc_add_path() { [ -d "$1" ] && inc_new_paths+=($1); 
 
 # Executable paths
 bin_add_path "$HOME/bin"
-#bin_add_path "$HOME/.cabal/bin"
+bin_add_path "$HOME/.cabal/bin"
 #bin_add_path "$HOME/.opt/haskell-platform/2012.4.0.0/bin"
 #bin_add_path "$HOME/.opt/ghc/4.7.2-bin/bin"
 #bin_add_path "$HOME/.opt/postgresql/9.2.4/bin"
 #bin_add_path "$HOME/.opt/vim/7.3/bin"
 #bin_add_path "$HOME/.opt/gcc/bin"
 #bin_add_path "$HOME/perl5/perlbrew/bin"
-#bin_add_path "/var/lib/gems/1.8/bin"
-#bin_add_path "/var/lib/gems/1.9.1/bin"
 
 # Library paths
 #lib_add_path "$HOME/.opt/postgresql/9.2.4/lib"
@@ -116,9 +114,8 @@ export  C_INCLUDE_PATH="$(IFS=':'; printf '%s' "${inc_new_paths[*]}"):$C_INCLUDE
 
 # Brews
 
-source ~/perl5/perlbrew/etc/bashrc
+function source_if_exists() { if [[ -s "$1" ]]; then source "$1"; fi }
 
-PATH="$PATH:$HOME/.rvm/bin"
-[[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm"
-
-[[ -s "$HOME/.pythonbrew/etc/bashrc" ]] && source "$HOME/.pythonbrew/etc/bashrc"
+source_if_exists "$HOME/perl5/perlbrew/etc/bashrc"
+source_if_exists "$HOME/.rvm/scripts/rvm"
+source_if_exists "$HOME/.pythonbrew/etc/bashrc"
