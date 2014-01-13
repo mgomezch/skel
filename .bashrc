@@ -49,8 +49,8 @@ export BC_LINE_LENGTH=0
 # Bash customization
 
 HISTCONTROL=ignoreboth:erasedups
-HISTSIZE=65535
-HISTFILESIZE=65535
+HISTSIZE=6553500
+HISTFILESIZE=6553500
 
 alias ls='ls --color=auto'
 alias grep='grep --color=auto'
@@ -114,7 +114,12 @@ export  C_INCLUDE_PATH="$(IFS=':'; printf '%s' "${inc_new_paths[*]}"):$C_INCLUDE
 
 # Brews
 
-function source_if_exists() { if [[ -s "$1" ]]; then source "$1"; fi }
+function source_if_exists() {
+  if [[ -s "$1" ]]
+  then
+    source "$1"
+  fi
+}
 
 source_if_exists "$HOME/perl5/perlbrew/etc/bashrc"
 source_if_exists "$HOME/.rvm/scripts/rvm"

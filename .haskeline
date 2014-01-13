@@ -1,0 +1,4 @@
+maxHistorySize: Just 65535
+historyDuplicates: IgnoreAll
+keyseq: "\ESC[5~" meta-k
+keyseq: "\ESC[6~" meta-j
