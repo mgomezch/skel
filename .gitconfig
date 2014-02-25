@@ -3,7 +3,6 @@
 	email = 
 [github]
 	user = 
-	token = 
 [diff]
 	tool = vimdiff
 [difftool]

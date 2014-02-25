@@ -55,34 +55,38 @@ endif
 
 
 
+runtime ftplugin/man.vim
+
 " Options
 set background=dark
 set cryptmethod=blowfish
+set expandtab
+set history=32768
 set hls
 set incsearch
 set mouse=a
 set nobackup
 set notimeout
+set noshowmode
 set number
+set shiftwidth=2
 set showcmd
 set showmatch
-
-set timeout
-set ttimeout
-set timeoutlen=0
-set ttimeoutlen=0
-
-set history=32768
+set softtabstop=0
+set t_Co=256
+set tabstop=8
+set undodir=~/.vim/undo/
 set undolevels=16384
 
-set expandtab
-set shiftwidth=2
-set softtabstop=0
-set tabstop=8
-
+set keymap=greek_utf-8
 set iminsert=0
 set imsearch=0
-set keymap=greek_utf-8
+
+set ttimeout
+set ttimeoutlen=0
+
+set timeout
+set timeoutlen=100000000000000000
 
 let g:netrw_altv = 1
 
@@ -98,27 +102,122 @@ map <F7>  :set scrollbind!<CR>
 map <F8>  :noh<CR>
 map <F10> `[v`]
 map <F11> @@
-map <F12> @:
-
-
-" Other mappings
-map <Leader>< :prev<CR>
-map <Leader>> :next<CR>
-map <Leader>w< :wprev<CR>
-map <Leader>w> :wnext<CR>
+map <F13> @:
 
 
 
-" Thrift stuff
-"au BufRead,BufNewFile *.thrift set filetype=thrift
-"au! Syntax thrift source ~/.vim/thrift.vim
+" NeoBundle
+"
+" mkdir -p ~/.vim/bundle
+" git clone git://github.com/Shougo/neobundle.vim ~/.vim/bundle/neobundle.vim
+
+if has('vim_starting')
+  set runtimepath+=~/.vim/bundle/neobundle.vim/
+endif
+
+call neobundle#rc(expand('~/.vim/bundle/'))
+
+NeoBundleFetch 'Shougo/neobundle.vim'
 
 
 
-"runtime ftplugin/man.vim
+NeoBundle 'Shougo/vimproc', {
+      \ 'build' : {
+      \     'windows' : 'make -f make_mingw32.mak',
+      \     'cygwin' : 'make -f make_cygwin.mak',
+      \     'mac' : 'make -f make_mac.mak',
+      \     'unix' : 'make -f make_unix.mak',
+      \    },
+      \ }
 
-"execute pathogen#infect()
+
+
+NeoBundle 'bling/vim-airline'
+
+set laststatus=2
+let g:airline#extensions#tabline#enabled = 1
+let g:airline_powerline_fonts = 1
 
 
 
-set undodir=~/.vim/undo/
+NeoBundle 'scrooloose/nerdtree'
+NeoBundle 'jistr/vim-nerdtree-tabs'
+
+map <Leader>n <plug>NERDTreeTabsToggle<CR>
+
+
+
+NeoBundle 'kien/rainbow_parentheses.vim'
+
+au VimEnter * RainbowParenthesesToggle
+au Syntax * RainbowParenthesesLoadRound
+au Syntax * RainbowParenthesesLoadSquare
+au Syntax * RainbowParenthesesLoadBraces
+
+
+
+NeoBundle 'benmills/vimux'
+NeoBundle 'chrisbra/csv.vim'
+NeoBundle 'daviddavis/vim-colorpack'
+NeoBundle 'edsono/vim-matchit'
+NeoBundle 'godlygeek/tabular'
+NeoBundle 'hail2u/vim-css3-syntax'
+NeoBundle 'jmcantrell/vim-virtualenv'
+NeoBundle 'kchmck/vim-coffee-script'
+NeoBundle 'klen/python-mode'
+NeoBundle 'mhinz/vim-signify'
+NeoBundle 'mhinz/vim-tmuxify'
+NeoBundle 'mileszs/ack.vim'
+NeoBundle 'othree/html5.vim'
+NeoBundle 'othree/javascript-libraries-syntax.vim'
+NeoBundle 'pangloss/vim-javascript'
+NeoBundle 'pbrisbin/html-template-syntax'
+NeoBundle 'scrooloose/nerdcommenter'
+NeoBundle 'scrooloose/syntastic'
+NeoBundle 'sjl/gundo.vim'
+NeoBundle 'terryma/vim-multiple-cursors'
+NeoBundle 'tpope/vim-fugitive'
+NeoBundle 'tpope/vim-repeat'
+NeoBundle 'tpope/vim-surround'
+NeoBundle 'tpope/vim-unimpaired'
+NeoBundle 'vim-jp/cpp-vim'
+
+
+
+NeoBundle 'shougo/neocomplcache'
+
+let g:acp_enableAtStartup = 0
+let g:neocomplete#enable_at_startup = 1
+let g:neocomplete#enable_smart_case = 1
+let g:neocomplete#sources#syntax#min_keyword_length = 3
+
+inoremap <expr><TAB>  pumvisible() ? "\<C-n>" : "\<TAB>"
+
+autocmd FileType css setlocal omnifunc=csscomplete#CompleteCSS
+autocmd FileType html,markdown setlocal omnifunc=htmlcomplete#CompleteTags
+autocmd FileType javascript setlocal omnifunc=javascriptcomplete#CompleteJS
+autocmd FileType python setlocal omnifunc=pythoncomplete#Complete
+autocmd FileType xml setlocal omnifunc=xmlcomplete#CompleteTags
+
+
+
+NeoBundle 'mattn/webapi-vim'
+NeoBundle 'mattn/gist-vim'
+
+let g:gist_clip_command = 'xclip -selection clipboard'
+let g:gist_detect_filetype = 1
+let g:gist_show_privates = 1
+let g:gist_post_private = 1
+let g:gist_get_multiplefile = 1
+
+
+
+NeoBundle 'shougo/unite.vim'
+NeoBundle 'osyo-manga/unite-quickfix'
+
+
+
+NeoBundle 'dag/vim2hs'
+
+let g:haskell_conceal = 0
+let g:haskell_conceal_enumerations = 0
