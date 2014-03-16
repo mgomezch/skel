@@ -1,44 +1,41 @@
 # Path to your oh-my-zsh configuration.
-ZSH=$HOME/.oh-my-zsh
-ZSH_THEME="manuel"
+ZSH="${HOME}/.oh-my-zsh"
+DEFAULT_USER='manuel'
+DISABLE_AUTO_TITLE='false'
+COMPLETION_WAITING_DOTS='true'
+DISABLE_UNTRACKED_FILES_DIRTY='true' # This makes Git faster but it can’t notice untracked files well.
+HIST_STAMPS='yyyy-mm-dd'
+
+plugins=(
+  cabal
+  catimg
+  colored-man
+  colorize
+  common-aliases
+  compleat
+  dircycle
+  git
+  git-extras
+  nyan
+  perl
+  pep8
+  pip
+  pyenv
+  pylint
+  python
+  rails
+  rvm
+  screen
+  sprunge
+  tmux
+  urltools
+)
 
 # export UPDATE_ZSH_DAYS=13
 # DISABLE_AUTO_UPDATE='true'
 
-DISABLE_AUTO_TITLE='false'
-COMPLETION_WAITING_DOTS='true' # Display red dots while waiting for completion
-DISABLE_UNTRACKED_FILES_DIRTY='true' # This makes Git faster but it can’t notice untracked files well.
-HIST_STAMPS='yyyy-mm-dd'
-
-plugins=(     \
-  git         \
-  cabal       \
-  catimg      \
-  colored-man \
-  colorize    \
-  github      \
-)
-
-DEFAULT_USER='manuel'
-
-source $ZSH/oh-my-zsh.sh
-
-
-
-# TODO: paths
-
-export PATH="/home/manuel/.cabal/bin:/home/manuel/.opt/github/hub/bin:/home/manuel/.opt/haskell_platform/2013.2.0.0/bin:/home/manuel/.opt/ghc/7.6.3/bin:/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games"
-# export MANPATH="/usr/local/man:$MANPATH"
-
-# Environment
-
-export LANG='en_US.UTF-8'
-export LC_ALL='en_US.UTF-8'
-export PAGER='less -S' # TODO: use vim as the pager
-export EDITOR='vim'
-export BC_LINE_LENGTH=0
-#export MPD_HOST='@localhost'
-#export PGDATA="${HOME}/.opt/postgresql/9.2.4/data"
+source "${ZSH}/oh-my-zsh.sh"
+source "${HOME}/.zshtheme"
 
 
 
@@ -223,10 +220,10 @@ unsetopt SH_WORD_SPLIT
 # Zle
   setopt BEEP
   setopt COMBINING_CHARS
-unsetopt EMACS
+  setopt EMACS
 unsetopt OVERSTRIKE
 unsetopt SINGLE_LINE_ZLE
-  setopt VI
+unsetopt VI
   setopt ZLE
 
 
@@ -239,3 +236,94 @@ zle -N up-line-or-beginning-search
 zle -N down-line-or-beginning-search
 [[ -n "${key[PageUp]}"   ]] && bindkey "${key[PageUp]}"   up-line-or-beginning-search
 [[ -n "${key[PageDown]}" ]] && bindkey "${key[PageDown]}" down-line-or-beginning-search
+
+
+
+# TODO: manpath
+
+# User executable and library paths
+bin_new_paths=(); function bin_add_path() { [[ -d $1 ]] && bin_new_paths+=($1); }
+lib_new_paths=(); function lib_add_path() { [[ -d $1 ]] && lib_new_paths+=($1); }
+inc_new_paths=(); function inc_add_path() { [[ -d $1 ]] && inc_new_paths+=($1); }
+
+# Executable paths
+bin_add_path "${HOME}/bin"
+bin_add_path "${HOME}/stuff/commands"
+bin_add_path "${HOME}/.cabal/bin"
+bin_add_path "${HOME}/.opt/github/hub/bin"
+bin_add_path "${HOME}/.opt/haskell_platform/2013.2.0.0/bin"
+bin_add_path "${HOME}/.opt/ghc/7.6.3/bin"
+#bin_add_path "${HOME}/.opt/postgresql/9.2.4/bin"
+#bin_add_path "${HOME}/.opt/vim/7.3/bin"
+#bin_add_path "${HOME}/.opt/gcc/bin"
+#bin_add_path "${HOME}/perl5/perlbrew/bin"
+
+# Library paths
+#lib_add_path "${HOME}/.opt/postgresql/9.2.4/lib"
+#lib_add_path "${HOME}/.opt/gcc/lib"
+#lib_add_path "${HOME}/.opt/gcc/lib64"
+
+# Include paths — shouldn’t this be handled by pkg-config?
+#inc_add_path "${HOME}/.opt/postgresql/9.2.4/include"
+
+export            PATH="$(IFS=':'; printf '%s' "${bin_new_paths[*]}"):${PATH}"
+export LD_LIBRARY_PATH="$(IFS=':'; printf '%s' "${lib_new_paths[*]}"):${LD_LIBRARY_PATH}"
+export     LD_RUN_PATH="$(IFS=':'; printf '%s' "${lib_new_paths[*]}"):${LD_RUN_PATH}"
+export  C_INCLUDE_PATH="$(IFS=':'; printf '%s' "${inc_new_paths[*]}"):${C_INCLUDE_PATH}"
+
+#export LD_LIBRARY_PATH="$(ghc-pkg list --simple-output --global | sed -e 's@ @:@g' -e "s@[^:]\+@$HOME/.cabal/lib/i386-linux-ghc-7.7.20130420/&@g"):$(ghc-pkg list --simple-output --global | sed -e 's@ @:@g' -e 's@[^:]\+@/var/local/manuel/haskell/ghc/HEAD/lib/ghc-7.7.20130420/&@g')"
+
+
+
+# Environment
+
+[[ ${TERM} == xterm ]] && export TERM='xterm-256color'
+export LANG='en_US.UTF-8'
+export LC_ALL='en_US.UTF-8'
+export PAGER='less -S' # TODO: use vim as the pager
+export EDITOR='vim'
+export BC_LINE_LENGTH=0
+#export MPD_HOST='@localhost'
+#export PGDATA="${HOME}/.opt/postgresql/9.2.4/data"
+
+
+
+function prxmonitor() {
+  for i in {1..7}
+  do
+    gkrellm -s '127.0.0.1' -P "$((19150 + i))" &
+  done
+}
+
+function prxssh() {
+  ssh \
+    -L 19151:127.0.0.1:19150 \
+    -L 19152:127.0.0.1:19152 \
+    -L 19153:127.0.0.1:19153 \
+    -L 19154:127.0.0.1:19154 \
+    -L 19155:127.0.0.1:19155 \
+    -L 19156:127.0.0.1:19156 \
+    -L 19157:127.0.0.1:19157 \
+    pcaaudit.com
+}
+
+function v1p() {
+  vim -E \
+    -c 1p               \
+    -c 'echo input("")' \
+    -c q                \
+    "${@}"
+}
+
+function defensa() {
+  impressive             \
+    --duration 30:00     \
+    --minutes            \
+    --nologo             \
+    --noclicks           \
+    --page-progress      \
+    -T 0                 \
+    --zoom 4             \
+    --cache persistent   \
+    "${@}"
+}
