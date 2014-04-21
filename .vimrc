@@ -76,6 +76,7 @@ set softtabstop=0
 set t_Co=256
 set tabstop=8
 set undodir=~/.vim/undo/
+set undofile
 set undolevels=16384
 
 set keymap=greek_utf-8
@@ -159,6 +160,7 @@ au Syntax * RainbowParenthesesLoadBraces
 NeoBundle 'benmills/vimux'
 NeoBundle 'chrisbra/csv.vim'
 NeoBundle 'daviddavis/vim-colorpack'
+NeoBundle 'edkolev/tmuxline.vim'
 NeoBundle 'edsono/vim-matchit'
 NeoBundle 'godlygeek/tabular'
 NeoBundle 'hail2u/vim-css3-syntax'
@@ -173,14 +175,19 @@ NeoBundle 'othree/javascript-libraries-syntax.vim'
 NeoBundle 'pangloss/vim-javascript'
 NeoBundle 'pbrisbin/html-template-syntax'
 NeoBundle 'scrooloose/nerdcommenter'
-NeoBundle 'scrooloose/syntastic'
-NeoBundle 'sjl/gundo.vim'
 NeoBundle 'terryma/vim-multiple-cursors'
 NeoBundle 'tpope/vim-fugitive'
 NeoBundle 'tpope/vim-repeat'
 NeoBundle 'tpope/vim-surround'
 NeoBundle 'tpope/vim-unimpaired'
 NeoBundle 'vim-jp/cpp-vim'
+
+
+
+NeoBundle 'scrooloose/syntastic'
+
+let g:syntastic_cpp_compiler = 'clang++'
+let g:syntastic_cpp_compiler_options = ' -std=c++11 -stdlib=libc++'
 
 
 
@@ -221,3 +228,11 @@ NeoBundle 'dag/vim2hs'
 
 let g:haskell_conceal = 0
 let g:haskell_conceal_enumerations = 0
+
+
+
+NeoBundle 'sjl/gundo.vim'
+
+let g:gundo_right = 1
+
+map <Leader>u :GundoToggle<CR>

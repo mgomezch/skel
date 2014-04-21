@@ -3,7 +3,7 @@ ZSH="${HOME}/.oh-my-zsh"
 DEFAULT_USER='manuel'
 DISABLE_AUTO_TITLE='false'
 COMPLETION_WAITING_DOTS='true'
-DISABLE_UNTRACKED_FILES_DIRTY='true' # This makes Git faster but it can’t notice untracked files well.
+DISABLE_UNTRACKED_FILES_DIRTY='false' # This makes Git faster but it can’t notice untracked files well.
 HIST_STAMPS='yyyy-mm-dd'
 
 plugins=(
@@ -136,7 +136,7 @@ unsetopt ALL_EXPORT
   setopt ALIASES
 unsetopt CLOBBER
   setopt CORRECT
-  setopt CORRECT_ALL
+unsetopt CORRECT_ALL
 unsetopt DVORAK
 unsetopt FLOW_CONTROL
 unsetopt IGNORE_EOF
@@ -245,6 +245,8 @@ zle -N down-line-or-beginning-search
 bin_new_paths=(); function bin_add_path() { [[ -d $1 ]] && bin_new_paths+=($1); }
 lib_new_paths=(); function lib_add_path() { [[ -d $1 ]] && lib_new_paths+=($1); }
 inc_new_paths=(); function inc_add_path() { [[ -d $1 ]] && inc_new_paths+=($1); }
+inf_new_paths=(); function inf_add_path() { [[ -d $1 ]] && inf_new_paths+=($1); }
+man_new_paths=(); function man_add_path() { [[ -d $1 ]] && man_new_paths+=($1); }
 
 # Executable paths
 bin_add_path "${HOME}/bin"
@@ -253,6 +255,8 @@ bin_add_path "${HOME}/.cabal/bin"
 bin_add_path "${HOME}/.opt/github/hub/bin"
 bin_add_path "${HOME}/.opt/haskell_platform/2013.2.0.0/bin"
 bin_add_path "${HOME}/.opt/ghc/7.6.3/bin"
+bin_add_path "${HOME}/.opt/texlive/2013/bin/i386-linux"
+bin_add_path "${HOME}/.opt/TogglDesktop"
 #bin_add_path "${HOME}/.opt/postgresql/9.2.4/bin"
 #bin_add_path "${HOME}/.opt/vim/7.3/bin"
 #bin_add_path "${HOME}/.opt/gcc/bin"
@@ -266,10 +270,18 @@ bin_add_path "${HOME}/.opt/ghc/7.6.3/bin"
 # Include paths — shouldn’t this be handled by pkg-config?
 #inc_add_path "${HOME}/.opt/postgresql/9.2.4/include"
 
+# GNU texinfo paths
+inf_add_path "${HOME}/.opt/texlive/2013/texmf-dist/doc/info"
+
+# Manual paths
+man_add_path "${HOME}/.opt/texlive/2013/texmf-dist/doc/man"
+
 export            PATH="$(IFS=':'; printf '%s' "${bin_new_paths[*]}"):${PATH}"
 export LD_LIBRARY_PATH="$(IFS=':'; printf '%s' "${lib_new_paths[*]}"):${LD_LIBRARY_PATH}"
 export     LD_RUN_PATH="$(IFS=':'; printf '%s' "${lib_new_paths[*]}"):${LD_RUN_PATH}"
 export  C_INCLUDE_PATH="$(IFS=':'; printf '%s' "${inc_new_paths[*]}"):${C_INCLUDE_PATH}"
+export        INFOPATH="$(IFS=':'; printf '%s' "${inf_new_paths[*]}"):${INFOPATH}"
+export         MANPATH="$(IFS=':'; printf '%s' "${man_new_paths[*]}"):${MANPATH}"
 
 #export LD_LIBRARY_PATH="$(ghc-pkg list --simple-output --global | sed -e 's@ @:@g' -e "s@[^:]\+@$HOME/.cabal/lib/i386-linux-ghc-7.7.20130420/&@g"):$(ghc-pkg list --simple-output --global | sed -e 's@ @:@g' -e 's@[^:]\+@/var/local/manuel/haskell/ghc/HEAD/lib/ghc-7.7.20130420/&@g')"
 
