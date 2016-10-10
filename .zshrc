@@ -362,6 +362,8 @@ command -v pyenv &>/dev/null && {
   eval "$(pyenv virtualenv-init -)"
 }
 
+command -v thefuck &>/dev/null && eval $(thefuck --alias)
+
 [[ -s "${HOME}/.nix-profile/etc/profile.d/nix.sh" ]] && source "${HOME}/.nix-profile/etc/profile.d/nix.sh"
 
 [[ -s "$HOME/perl5/perlbrew/etc/bashrc" ]] && source ~/perl5/perlbrew/etc/bashrc
