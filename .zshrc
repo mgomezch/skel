@@ -312,7 +312,7 @@ bin_add_path "${HOME}/.cabal/bin"
 bin_add_path "${HOME}/.opt/github/hub/bin"
 bin_add_path "${HOME}/.opt/texlive/2013/bin/i386-linux"
 bin_add_path "${HOME}/.opt/TogglDesktop"
-#bin_add_path "${HOME}/perl5/perlbrew/bin"
+bin_add_path "${HOME}/perl5/perlbrew/bin"
 
 # Library paths
 #lib_add_path "${HOME}/.opt/gcc/lib64"
@@ -368,6 +368,8 @@ command -v pyenv &>/dev/null && {
   eval "$(pyenv init -)"
   eval "$(pyenv virtualenv-init -)"
 }
+
+[[ -s "${HOME}/.nix-profile/etc/profile.d/nix.sh" ]] && source "${HOME}/.nix-profile/etc/profile.d/nix.sh"
 
 [[ -s "$HOME/perl5/perlbrew/etc/bashrc" ]] && source ~/perl5/perlbrew/etc/bashrc
 
