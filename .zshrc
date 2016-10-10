@@ -1,34 +1,70 @@
 # Path to your oh-my-zsh configuration.
 ZSH="${HOME}/.oh-my-zsh"
-DEFAULT_USER='manuel'
+DEFAULT_USER='mgomezch'
 DISABLE_AUTO_TITLE='false'
 COMPLETION_WAITING_DOTS='true'
 DISABLE_UNTRACKED_FILES_DIRTY='false' # This makes Git faster but it can’t notice untracked files well.
 HIST_STAMPS='yyyy-mm-dd'
 
 plugins=(
+  aws
+  bower
+  bundler
   cabal
   catimg
+  coffee
   colored-man
   colorize
   common-aliases
   compleat
+  cpanm
+  debian
   dircycle
+  django
+  docker
+  docker-compose
+  emoji
+  encode64
+  gem
   git
   git-extras
+  git-flow
+  git-hubflow
+  github
+  gnu-utils
+  golang
+  gpg-agent
+  grunt
+  heroku
+  mercurial
+  nmap
+  node
+  npm
   nyan
   perl
   pep8
   pip
+  postgres
   pyenv
   pylint
   python
   rails
+  ruby
+  rust
   rvm
+  sbt
+  scala
   screen
   sprunge
+  stack
+  sudo
+  systemd
   tmux
   urltools
+  vagrant
+  vim-interaction
+  virtualenv
+  zsh-nvm
 )
 
 # export UPDATE_ZSH_DAYS=13
@@ -62,7 +98,7 @@ unsetopt ALWAYS_TO_END
 unsetopt AUTO_PARAM_KEYS
   setopt AUTO_PARAM_SLASH
 unsetopt AUTO_REMOVE_SLASH
-unsetopt BASH_AUTO_LIST
+  setopt BASH_AUTO_LIST
 unsetopt COMPLETE_ALIASES
   setopt COMPLETE_IN_WORD
   setopt GLOB_COMPLETE
@@ -119,7 +155,7 @@ unsetopt WARN_CREATE_GLOBAL # :( this should really be set, but it breaks stuff
   setopt HIST_LEX_WORDS
 unsetopt HIST_NO_FUNCTIONS
 unsetopt HIST_NO_STORE
-  setopt HIST_REDUCE_BLANKS
+unsetopt HIST_REDUCE_BLANKS
   setopt HIST_SAVE_BY_COPY
   setopt HIST_SAVE_NO_DUPS
   setopt HIST_VERIFY
@@ -228,14 +264,30 @@ unsetopt VI
 
 
 
+# Completion configuration
+
+zstyle ':completion:*' completer _expand _complete _ignored _match _correct _approximate _prefix
+zstyle ':completion:*' expand prefix suffix
+zstyle ':completion:*' file-sort name
+zstyle ':completion:*' insert-unambiguous true
+zstyle ':completion:*' list-suffixes true
+zstyle ':completion:*' matcher-list '+' '+m:{[:lower:][:upper:]}={[:upper:][:lower:]}' '+r:|[._-]=* r:|=*' '+l:|=* r:|=*'
+zstyle ':completion:*' match-original only
+zstyle ':completion:*' max-errors 6 numeric
+zstyle ':completion:*' menu select=1
+zstyle ':completion:*' original false
+zstyle ':completion:*' verbose true
+
+zstyle :compinstall filename "${HOME}/.zshrc"
+autoload -Uz compinit
+compinit
+
+
+
 # History searching with PageUp/Down
 
-autoload -U up-line-or-beginning-search
-autoload -U down-line-or-beginning-search
-zle -N up-line-or-beginning-search
-zle -N down-line-or-beginning-search
-[[ -n "${key[PageUp]}"   ]] && bindkey "${key[PageUp]}"   up-line-or-beginning-search
-[[ -n "${key[PageDown]}" ]] && bindkey "${key[PageDown]}" down-line-or-beginning-search
+bindkey '^[[5~' history-beginning-search-backward
+bindkey '^[[6~' history-beginning-search-forward
 
 
 
@@ -249,32 +301,30 @@ inf_new_paths=(); function inf_add_path() { [[ -d $1 ]] && inf_new_paths+=($1); 
 man_new_paths=(); function man_add_path() { [[ -d $1 ]] && man_new_paths+=($1); }
 
 # Executable paths
+bin_add_path "${HOME}/.rvm/bin"
+bin_add_path "${HOME}/.pyenv/bin"
+bin_add_path "${HOME}/.cargo/bin"
+bin_add_path "${HOME}/.rakudobrew/moar-nom/install/share/perl6/site/bin"
 bin_add_path "${HOME}/bin"
+bin_add_path "${HOME}/stuff/bin"
 bin_add_path "${HOME}/stuff/commands"
 bin_add_path "${HOME}/.cabal/bin"
 bin_add_path "${HOME}/.opt/github/hub/bin"
-bin_add_path "${HOME}/.opt/haskell_platform/2013.2.0.0/bin"
-bin_add_path "${HOME}/.opt/ghc/7.6.3/bin"
 bin_add_path "${HOME}/.opt/texlive/2013/bin/i386-linux"
 bin_add_path "${HOME}/.opt/TogglDesktop"
-#bin_add_path "${HOME}/.opt/postgresql/9.2.4/bin"
-#bin_add_path "${HOME}/.opt/vim/7.3/bin"
-#bin_add_path "${HOME}/.opt/gcc/bin"
 #bin_add_path "${HOME}/perl5/perlbrew/bin"
 
 # Library paths
-#lib_add_path "${HOME}/.opt/postgresql/9.2.4/lib"
-#lib_add_path "${HOME}/.opt/gcc/lib"
 #lib_add_path "${HOME}/.opt/gcc/lib64"
 
 # Include paths — shouldn’t this be handled by pkg-config?
 #inc_add_path "${HOME}/.opt/postgresql/9.2.4/include"
 
 # GNU texinfo paths
-inf_add_path "${HOME}/.opt/texlive/2013/texmf-dist/doc/info"
+#inf_add_path "${HOME}/.opt/texlive/2013/texmf-dist/doc/info"
 
 # Manual paths
-man_add_path "${HOME}/.opt/texlive/2013/texmf-dist/doc/man"
+#man_add_path "${HOME}/.opt/texlive/2013/texmf-dist/doc/man"
 
 export            PATH="$(IFS=':'; printf '%s' "${bin_new_paths[*]}"):${PATH}"
 export LD_LIBRARY_PATH="$(IFS=':'; printf '%s' "${lib_new_paths[*]}"):${LD_LIBRARY_PATH}"
@@ -283,8 +333,6 @@ export  C_INCLUDE_PATH="$(IFS=':'; printf '%s' "${inc_new_paths[*]}"):${C_INCLUD
 export        INFOPATH="$(IFS=':'; printf '%s' "${inf_new_paths[*]}"):${INFOPATH}"
 export         MANPATH="$(IFS=':'; printf '%s' "${man_new_paths[*]}"):${MANPATH}"
 
-#export LD_LIBRARY_PATH="$(ghc-pkg list --simple-output --global | sed -e 's@ @:@g' -e "s@[^:]\+@$HOME/.cabal/lib/i386-linux-ghc-7.7.20130420/&@g"):$(ghc-pkg list --simple-output --global | sed -e 's@ @:@g' -e 's@[^:]\+@/var/local/manuel/haskell/ghc/HEAD/lib/ghc-7.7.20130420/&@g')"
-
 
 
 # Environment
@@ -292,32 +340,12 @@ export         MANPATH="$(IFS=':'; printf '%s' "${man_new_paths[*]}"):${MANPATH}
 [[ ${TERM} == xterm ]] && export TERM='xterm-256color'
 export LANG='en_US.UTF-8'
 export LC_ALL='en_US.UTF-8'
-export PAGER='less -S' # TODO: use vim as the pager
+export PAGER='less -S'
+export LESS='-r'
 export EDITOR='vim'
 export BC_LINE_LENGTH=0
-#export MPD_HOST='@localhost'
-#export PGDATA="${HOME}/.opt/postgresql/9.2.4/data"
 
 
-
-function prxmonitor() {
-  for i in {1..7}
-  do
-    gkrellm -s '127.0.0.1' -P "$((19150 + i))" &
-  done
-}
-
-function prxssh() {
-  ssh \
-    -L 19151:127.0.0.1:19150 \
-    -L 19152:127.0.0.1:19152 \
-    -L 19153:127.0.0.1:19153 \
-    -L 19154:127.0.0.1:19154 \
-    -L 19155:127.0.0.1:19155 \
-    -L 19156:127.0.0.1:19156 \
-    -L 19157:127.0.0.1:19157 \
-    pcaaudit.com
-}
 
 function v1p() {
   vim -E \
@@ -327,15 +355,59 @@ function v1p() {
     "${@}"
 }
 
-function defensa() {
-  impressive             \
-    --duration 30:00     \
-    --minutes            \
-    --nologo             \
-    --noclicks           \
-    --page-progress      \
-    -T 0                 \
-    --zoom 4             \
-    --cache persistent   \
-    "${@}"
+
+
+# Nix package manager
+
+source "${HOME}/.nix-profile/etc/profile.d/nix.sh"
+export LOCALE_ARCHIVE="${HOME}/.nix-profile/lib/locale/locale-archive"
+
+
+
+command -v pyenv &>/dev/null && {
+  eval "$(pyenv init -)"
+  eval "$(pyenv virtualenv-init -)"
 }
+
+[[ -s "$HOME/perl5/perlbrew/etc/bashrc" ]] && source ~/perl5/perlbrew/etc/bashrc
+
+[[ -x "$HOME/.rakudobrew/bin/rakudobrew" ]] && eval "$(~/.rakudobrew/bin/rakudobrew init -)"
+
+[[ -s "$HOME/.gvm/scripts/gvm" ]] && source "$HOME/.gvm/scripts/gvm"
+
+[[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm" # Load RVM into a shell session *as a function*
+
+
+
+alias sqitch-surveys='docker run -it -v ~/.sqitch:/root/.sqitch -v "$PWD:/src" --rm matteofigus/docker-sqitch sqitch'
+
+alias pstree='pstree -pUSlaughs'
+
+# alias mvn='docker run --rm -it -v ~/.m2:/root/.m2 -v "$PWD":/usr/src/mymaven -w /usr/src/mymaven maven:3.3.9-jdk-8 mvn'
+
+function work-hours() {
+  cat "${@:-${HOME}/work.yaml}" | yaml2json - | jq '((([.[] | ."Home time",."Office time" | .Ranges | .[]? | .Duration | strings | ((capture("(?<amount>[0-9]+)m") | .amount | tonumber), (capture("(?<amount>[0-9]+)h") | .amount | tonumber | . * 60))] | add) // 0) - (8 * 60 * ([.[] | .Day | values] | length))) / 60'
+}
+
+function work-expenses() {
+  cat "${@:-${HOME}/work.yaml}" | yaml2json - | jq '([ .. | .Amount? | strings | capture("(?<amount>[0-9]+)") | .amount | tonumber] | add) // 0'
+}
+
+function work-hours-plot() {
+  cat "${@:-${HOME}/work.yaml}" | yaml2json - | jq -r 'map_values(((([."Home time",."Office time" | .Ranges | .[]? | .Duration | strings | ((capture("(?<amount>[0-9]+)m") | .amount | tonumber), (capture("(?<amount>[0-9]+)h") | .amount | tonumber | . * 60))]) | add // 0) / 60)) | to_entries | .[] | .key + " " + (.value | tostring)' | sort -n | gnuplot -p -e 'set xdata time; set timefmt "%Y-%m-%d"; set offset graph 0.05, 0.05, 0.05, 0.05; set xzeroaxis; set arrow 1 from graph 0,first 8 to graph 1,first 8 nohead; set title ""; plot "<cat" using 1:2 notitle'
+}
+
+function work-expenses-plot() {
+  cat "${@:-${HOME}/work.yaml}" | yaml2json - | jq -r 'map_values(.. | .Amount? | (strings | capture("(?<amount>[0-9]+)") | .amount | tonumber) // 0) | to_entries | .[] | .key + " " + (.value | tostring)' | sort -n | gnuplot -p -e 'set xdata time; set timefmt "%Y-%m-%d"; set offset graph 0.05, 0.05, 0.05, 0.05; set xzeroaxis; set title ""; plot "<cat" using 1:2 notitle'
+}
+
+
+
+zle -C all-matches complete-word _my_generic
+zstyle ':completion:all-matches::::' completer _all_matches
+zstyle ':completion:all-matches:*' old-matches only
+_my_generic () {
+  local ZSH_TRACE_GENERIC_WIDGET=  # works with "setopt nounset"
+  _generic "$@"
+}
+bindkey '^X^a' all-matches
