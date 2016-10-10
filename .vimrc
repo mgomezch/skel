@@ -4,34 +4,22 @@ let &runtimepath.=','.vimDir
 
 
 
-" NeoBundle
+" dein
 "
-" mkdir -p ~/.vim/bundle
-" git clone git://github.com/Shougo/neobundle.vim ~/.vim/bundle/neobundle.vim
+" git clone https://github.com/Shougo/dein.vim.git ~/.vim/dein/repos/github.com/Shougo/dein.vim
 
-if has('vim_starting')
-  set runtimepath+=~/.vim/bundle/neobundle.vim/
-endif
+set runtimepath+=~/.vim/dein/repos/github.com/Shougo/dein.vim
 
-call neobundle#begin(expand('~/.vim/bundle/'))
-
-NeoBundleFetch 'Shougo/neobundle.vim'
+call dein#begin(expand('~/.vim/dein'))
+call dein#add('Shougo/dein.vim')
 
 
 
-NeoBundle 'Shougo/vimproc.vim', {
-\ 'build' : {
-\     'windows' : 'tools\\update-dll-mingw',
-\     'cygwin' : 'make -f make_cygwin.mak',
-\     'mac' : 'make -f make_mac.mak',
-\     'linux' : 'make',
-\     'unix' : 'gmake',
-\    },
-\ }
+call dein#add('Shougo/vimproc.vim', {'build' : 'make'})
 
 
 
-NeoBundle 'bling/vim-airline'
+call dein#add('bling/vim-airline')
 
 set laststatus=2
 let g:airline#extensions#tabline#enabled = 1
@@ -39,14 +27,14 @@ let g:airline_powerline_fonts = 1
 
 
 
-NeoBundle 'scrooloose/nerdtree'
-NeoBundle 'jistr/vim-nerdtree-tabs'
+call dein#add('scrooloose/nerdtree')
+call dein#add('jistr/vim-nerdtree-tabs')
 
 map <Leader>n <plug>NERDTreeTabsToggle<CR>
 
 
 
-NeoBundle 'kien/rainbow_parentheses.vim'
+call dein#add('kien/rainbow_parentheses.vim')
 
 au VimEnter * RainbowParenthesesToggle
 au Syntax * RainbowParenthesesLoadRound
@@ -55,44 +43,45 @@ au Syntax * RainbowParenthesesLoadBraces
 
 
 
-NeoBundle 'benmills/vimux'
-NeoBundle 'chrisbra/csv.vim'
-NeoBundle 'daviddavis/vim-colorpack'
-NeoBundle 'digitaltoad/vim-pug'
-NeoBundle 'edkolev/tmuxline.vim'
-NeoBundle 'edsono/vim-matchit'
-NeoBundle 'godlygeek/tabular'
-NeoBundle 'hail2u/vim-css3-syntax'
-NeoBundle 'jmcantrell/vim-virtualenv'
-NeoBundle 'kchmck/vim-coffee-script'
-NeoBundle 'lifepillar/pgsql.vim'
-NeoBundle 'mhinz/vim-signify'
-NeoBundle 'mhinz/vim-tmuxify'
-NeoBundle 'mileszs/ack.vim'
-NeoBundle 'othree/html5.vim'
-NeoBundle 'othree/javascript-libraries-syntax.vim'
-NeoBundle 'pangloss/vim-javascript'
-NeoBundle 'pbrisbin/html-template-syntax'
-NeoBundle 'scrooloose/nerdcommenter'
-NeoBundle 'terryma/vim-multiple-cursors'
-NeoBundle 'tpope/vim-fugitive'
-NeoBundle 'tpope/vim-repeat'
-NeoBundle 'tpope/vim-surround'
-NeoBundle 'tpope/vim-unimpaired'
-NeoBundle 'vim-jp/cpp-vim'
+call dein#add('airblade/vim-gitgutter')
+call dein#add('benmills/vimux')
+call dein#add('chrisbra/csv.vim')
+call dein#add('daviddavis/vim-colorpack')
+call dein#add('digitaltoad/vim-pug')
+call dein#add('edkolev/tmuxline.vim')
+call dein#add('edsono/vim-matchit')
+call dein#add('godlygeek/tabular')
+call dein#add('hail2u/vim-css3-syntax')
+call dein#add('jmcantrell/vim-virtualenv')
+call dein#add('kchmck/vim-coffee-script')
+call dein#add('lifepillar/pgsql.vim')
+call dein#add('mhinz/vim-signify')
+call dein#add('mhinz/vim-tmuxify')
+call dein#add('mileszs/ack.vim')
+call dein#add('othree/html5.vim')
+call dein#add('othree/javascript-libraries-syntax.vim')
+call dein#add('pangloss/vim-javascript')
+call dein#add('pbrisbin/html-template-syntax')
+call dein#add('scrooloose/nerdcommenter')
+call dein#add('terryma/vim-multiple-cursors')
+call dein#add('tpope/vim-fugitive')
+call dein#add('tpope/vim-repeat')
+call dein#add('tpope/vim-surround')
+call dein#add('tpope/vim-unimpaired')
+call dein#add('vim-jp/cpp-vim')
 
 
 
-NeoBundle 'scrooloose/syntastic'
+call dein#add('scrooloose/syntastic')
 
 let g:syntastic_cpp_compiler = 'clang++'
 let g:syntastic_cpp_compiler_options = ' -std=c++11 -stdlib=libc++'
 
-" let g:syntastic_python_checkers = []
+let g:syntastic_python_checkers = []
 
 
 
-NeoBundle 'shougo/neocomplcache'
+call dein#add('shougo/neocomplcache')
 
 let g:acp_enableAtStartup = 0
 let g:neocomplete#enable_at_startup = 1
@@ -109,8 +98,8 @@ inoremap <expr><TAB>  pumvisible() ? "\<C-n>" : "\<TAB>"
 
 
 
-NeoBundle 'mattn/webapi-vim'
-NeoBundle 'mattn/gist-vim'
+call dein#add('mattn/webapi-vim')
+call dein#add('mattn/gist-vim')
 
 let g:gist_clip_command = 'xclip -selection clipboard'
 let g:gist_detect_filetype = 1
@@ -120,19 +109,19 @@ let g:gist_get_multiplefile = 1
 
 
 
-NeoBundle 'shougo/unite.vim'
-NeoBundle 'osyo-manga/unite-quickfix'
+call dein#add('shougo/unite.vim')
+call dein#add('osyo-manga/unite-quickfix')
 
 
 
-NeoBundle 'dag/vim2hs'
+call dein#add('dag/vim2hs')
 
 let g:haskell_conceal = 0
 let g:haskell_conceal_enumerations = 0
 
 
 
-NeoBundle 'sjl/gundo.vim'
+call dein#add('sjl/gundo.vim')
 
 let g:gundo_right = 1
 
@@ -140,15 +129,13 @@ map <Leader>u :GundoToggle<CR>
 
 
 
-" Fuck Python and fuck python-mode.  It’s the most annoying, bug-ridden piece of shit Vim plugin I’ve ever used.
-"NeoBundle 'klen/python-mode'
+call dein#add('klen/python-mode')
 
-" let g:pymode_lint = 0
-" let g:pymode_lint_checkers = []
+:let g:pymode_python = 'python3'
 
 
 
-call neobundle#end()
+call dein#end()
 
 
 
@@ -198,7 +185,7 @@ runtime ftplugin/man.vim
 
 " Options
 set background=dark
-set cryptmethod=blowfish
+set cryptmethod=blowfish2
 set expandtab
 set history=10000
 set hls
