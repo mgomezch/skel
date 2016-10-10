@@ -357,13 +357,6 @@ function v1p() {
 
 
 
-# Nix package manager
-
-source "${HOME}/.nix-profile/etc/profile.d/nix.sh"
-export LOCALE_ARCHIVE="${HOME}/.nix-profile/lib/locale/locale-archive"
-
-
-
 command -v pyenv &>/dev/null && {
   eval "$(pyenv init -)"
   eval "$(pyenv virtualenv-init -)"
