@@ -1,3 +1,6 @@
+[hub]
+  username = 
+  protocol = ssh
 [user]
   name = 
   email = 
