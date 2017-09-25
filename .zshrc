@@ -472,7 +472,7 @@ function zkspilo() {
   then
     zkgp --selector="application=spilo,version=${pg_cluster_name}" "${@}"
   else
-    echo "${0}: missing cluster name" >&2
+    echo "usage: ${0} cluster_name" >&2
   fi
 }
 alias zks='zkspilo'
@@ -483,7 +483,7 @@ function zkspiloprimary() {
   then
     zkgp "${@}" --selector="application=spilo,version=${pg_cluster_name},spilo-role=master"
   else
-    echo "${0}: missing cluster name" >&2
+    echo "usage: ${0} cluster_name" >&2
   fi
 }
 alias zksp='zkspiloprimary'
@@ -494,7 +494,7 @@ function zkspiloreplica() {
   then
     zkgp "${@}" --selector="application=spilo,version=${pg_cluster_name},spilo-role=replica"
   else
-    echo "${0}: missing cluster name" >&2
+    echo "usage: ${0} cluster_name" >&2
   fi
 }
 alias zksr='zkspiloreplica'
@@ -506,7 +506,7 @@ function zkspilopods() {
   then
     zkgpo --selector="application=spilo,version=${pg_cluster_name}" "${@}"
   else
-    echo "${0}: missing cluster name" >&2
+    echo "usage: ${0} cluster_name" >&2
   fi
 }
 alias zkso='zkspilopods'
@@ -517,7 +517,7 @@ function zkspiloprimarypods() {
   then
     zkgpo "${@}" --selector="application=spilo,version=${pg_cluster_name},spilo-role=master"
   else
-    echo "${0}: missing cluster name" >&2
+    echo "usage: ${0} cluster_name" >&2
   fi
 }
 alias zkspo='zkspiloprimarypods'
@@ -529,7 +529,7 @@ function zkspiloreplicapods() {
   then
     zkgp "${@}" --selector="application=spilo,version=${pg_cluster_name},spilo-role=replica"
   else
-    echo "${0}: missing cluster name" >&2
+    echo "usage: ${0} cluster_name" >&2
   fi
 }
 alias zksro='zkspiloreplicapods'
@@ -541,7 +541,7 @@ function zklspiloprimary() {
   then
     zkl "$(zkspo "${pg_cluster_name}")" "${@}"
   else
-    echo "${0}: missing cluster name" >&2
+    echo "usage: ${0} cluster_name" >&2
   fi
 }
 alias zklsp='zklspiloprimary'
@@ -553,7 +553,7 @@ function zkespiloprimary() {
   then
     zke "$(zkspo "${pg_cluster_name}")" "${@}"
   else
-    echo "${0}: missing cluster name" >&2
+    echo "usage: ${0} cluster_name" >&2
   fi
 }
 alias zkesp='zkespiloprimary'
@@ -580,6 +580,18 @@ function zkspiloprimarypsql() {
 }
 alias zkspq='zkspiloprimarypsql'
 alias zkqsp='zkspq'
+
+function zkspilopatronictl() {
+  pg_cluster_name="${1}"
+  patronictl_command="${2}"
+  if shift && shift
+  then
+    zke "$(zkso "${pg_cluster_name}" | lines | head -n 1)" -- sudo -i -u postgres -- patronictl "${patronictl_command}" "${pg_cluster_name}" "${@}"
+  else
+    echo "usage: ${0} cluster_name patronictl_command" >&2
+  fi
+}
+alias zksc='zkspilopatronictl'
 
 function loop_mksh() {
   while true
