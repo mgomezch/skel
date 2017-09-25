@@ -7,7 +7,7 @@ DISABLE_UNTRACKED_FILES_DIRTY='false' # This makes Git faster but it can’t not
 HIST_STAMPS='yyyy-mm-dd'
 
 plugins=(
-  aws
+# aws
   bower
   bundler
   cabal
@@ -36,13 +36,14 @@ plugins=(
   gpg-agent
   grunt
   heroku
+  kubectl
   mercurial
   nmap
   node
   npm
   nyan
-  perl
   pep8
+  perl
   pip
   postgres
   pyenv
@@ -362,25 +363,251 @@ command -v pyenv &>/dev/null && {
   eval "$(pyenv virtualenv-init -)"
 }
 
-command -v thefuck &>/dev/null && eval $(thefuck --alias)
-
-[[ -s "${HOME}/.nix-profile/etc/profile.d/nix.sh" ]] && source "${HOME}/.nix-profile/etc/profile.d/nix.sh"
-
-[[ -s "$HOME/perl5/perlbrew/etc/bashrc" ]] && source ~/perl5/perlbrew/etc/bashrc
+command -v thefuck &>/dev/null && eval "$(thefuck --alias)"
 
 [[ -x "$HOME/.rakudobrew/bin/rakudobrew" ]] && eval "$(~/.rakudobrew/bin/rakudobrew init -)"
 
-[[ -s "$HOME/.gvm/scripts/gvm" ]] && source "$HOME/.gvm/scripts/gvm"
+function source_if_exists() {
+  [[ -s "${1}" ]] && source "${1}"
+}
+source_if_exists "${HOME}/.nix-profile/etc/profile.d/nix.sh"
+source_if_exists "${HOME}/perl5/perlbrew/etc/bashrc"
+source_if_exists "${HOME}/.gvm/scripts/gvm"
+source_if_exists "${HOME}/.rvm/scripts/rvm"
+source_if_exists "${HOME}/stuff/code/repo/github.bus.zalan.do/bocytko/teams-helpers/teams-helpers"
 
-[[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm" # Load RVM into a shell session *as a function*
+
+
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
 
 
 
 alias sqitch-surveys='docker run -it -v ~/.sqitch:/root/.sqitch -v "$PWD:/src" --rm matteofigus/docker-sqitch sqitch'
 
-alias pstree='pstree -pUSlaughs'
+alias pst='pstree -pUSlaughs'
 
-# alias mvn='docker run --rm -it -v ~/.m2:/root/.m2 -v "$PWD":/usr/src/mymaven -w /usr/src/mymaven maven:3.3.9-jdk-8 mvn'
+alias psxe='ps -eFlyww'
+
+alias psx='ps -Flyww'
+
+alias nstl='sudo netstat -tnlp'
+
+alias lines="tr ' ' '\n'"
+
+alias k='kubectl'
+alias kg='k get -a -o wide --show-labels'
+alias kga='kg all'
+alias kgj='kg -o json'
+alias kgaj='kga -o json'
+alias kd='k describe'
+alias kD='k delete'
+alias kc='k create'
+alias kcf='kc -f'
+alias kl='k logs'
+alias klf='kl --follow'
+alias kt='k top'
+alias ke='k exec -it'
+alias kconf='k config'
+alias kcfg='kconf'
+alias kr='k run'
+alias kpf='k port-forward'
+
+alias kmini='kcfg use-context minikube'
+
+alias mk='kubectl --context=minikube'
+alias mkg='mk get -a -o wide --show-labels'
+alias mkga='mkg all'
+alias mkgj='mkg -o json'
+alias mkgaj='mkga -o json'
+alias mkd='mk describe'
+alias mkD='mk delete'
+alias mkc='mk create'
+alias mkcf='mkc -f'
+alias mkl='mk logs'
+alias mklf='mkl --follow'
+alias mkt='mk top'
+alias mke='mk exec -it'
+alias mkconf='mk config'
+alias mkcfg='mkconf'
+alias mkr='mk run'
+alias mkpf='mk port-forward'
+
+alias zk='zkubectl'
+alias zkg='zk get -a -o wide --show-labels'
+alias zkgp='zkg pods'
+alias zkgpo='zkgp --output=''jsonpath={.items..metadata.name}'''
+alias zkga='zkg all'
+alias zkgj='zkg -o json'
+alias zkgaj='zkga -o json'
+alias zkd='zk describe'
+alias zkD='zk delete'
+alias zkc='zk create'
+alias zkcf='zkc -f'
+alias zkl='zk logs'
+alias zklf='zkl --follow'
+alias zkt='zk top'
+alias zke='zk exec -it'
+alias zkconf='zk config'
+alias zkcfg='zkconf'
+alias zkr='zk run'
+alias zkpf='zk port-forward'
+
+alias zkspilos='zkgp --selector=''application=spilo'''
+alias zkss='zkspilos'
+alias zksso='zkss --output=''jsonpath={.items..metadata.name}'''
+alias zkspilosprimary='zkgp --selector=''application=spilo,spilo-role=master'''
+alias zkspilosreplica='zkgp --selector=''application=spilo,spilo-role=replica'''
+alias zkssp='zkspilosprimary'
+alias zkssr='zkspilosreplica'
+alias zksspo='zkssp --output=''jsonpath={.items..metadata.name}'''
+alias zkssro='zkssr --output=''jsonpath={.items..metadata.name}'''
+alias zkssop='zksspo'
+alias zkssor='zkssro'
+
+function zkspilo() {
+  pg_cluster_name="${1}"
+  if shift
+  then
+    zkgp --selector="application=spilo,version=${pg_cluster_name}" "${@}"
+  else
+    echo "${0}: missing cluster name" >&2
+  fi
+}
+alias zks='zkspilo'
+
+function zkspiloprimary() {
+  pg_cluster_name="${1}"
+  if shift
+  then
+    zkgp "${@}" --selector="application=spilo,version=${pg_cluster_name},spilo-role=master"
+  else
+    echo "${0}: missing cluster name" >&2
+  fi
+}
+alias zksp='zkspiloprimary'
+
+function zkspiloreplica() {
+  pg_cluster_name="${1}"
+  if shift
+  then
+    zkgp "${@}" --selector="application=spilo,version=${pg_cluster_name},spilo-role=replica"
+  else
+    echo "${0}: missing cluster name" >&2
+  fi
+}
+alias zksr='zkspiloreplica'
+alias zksro='zksr'
+
+function zkspilopods() {
+  pg_cluster_name="${1}"
+  if shift
+  then
+    zkgpo --selector="application=spilo,version=${pg_cluster_name}" "${@}"
+  else
+    echo "${0}: missing cluster name" >&2
+  fi
+}
+alias zkso='zkspilopods'
+
+function zkspiloprimarypods() {
+  pg_cluster_name="${1}"
+  if shift
+  then
+    zkgpo "${@}" --selector="application=spilo,version=${pg_cluster_name},spilo-role=master"
+  else
+    echo "${0}: missing cluster name" >&2
+  fi
+}
+alias zkspo='zkspiloprimarypods'
+alias zksop='zkspo'
+
+function zkspiloreplicapods() {
+  pg_cluster_name="${1}"
+  if shift
+  then
+    zkgp "${@}" --selector="application=spilo,version=${pg_cluster_name},spilo-role=replica"
+  else
+    echo "${0}: missing cluster name" >&2
+  fi
+}
+alias zksro='zkspiloreplicapods'
+alias zksor='zksro'
+
+function zklspiloprimary() {
+  pg_cluster_name="${1}"
+  if shift
+  then
+    zkl "$(zkspo "${pg_cluster_name}")" "${@}"
+  else
+    echo "${0}: missing cluster name" >&2
+  fi
+}
+alias zklsp='zklspiloprimary'
+alias zkspl='zklsp'
+
+function zkespiloprimary() {
+  pg_cluster_name="${1}"
+  if shift
+  then
+    zke "$(zkspo "${pg_cluster_name}")" "${@}"
+  else
+    echo "${0}: missing cluster name" >&2
+  fi
+}
+alias zkesp='zkespiloprimary'
+alias zkspe='zkesp'
+
+function zkbash() {
+  zke "${@}" -- bash
+}
+alias zkb='zkbash'
+
+function zkspiloprimarybash() {
+  zkesp "${@}" -- bash
+}
+alias zkspb='zkspiloprimarybash'
+alias zkbsp='zkspb'
+
+function zkpsql() {
+  zke "${@}" -- sudo -i -u postgres -- psql
+}
+alias zkq='zkpsql'
+
+function zkspiloprimarypsql() {
+  zkesp "${@}" -- sudo -i -u postgres -- psql
+}
+alias zkspq='zkspiloprimarypsql'
+alias zkqsp='zkspq'
+
+function loop_mksh() {
+  while true
+  do
+    if \
+      sudo VBoxManage showvminfo --machinereadable minikube \
+      | grep -m1 -q '^VMState="paused"'
+    then
+      mke "${1}" -- bash -c 'TERM=xterm bash'
+      echo 'Exited kubectl exec'
+    fi
+    sleep_tagged minikube_vbox
+  done
+}
+
+function loop_mklf() {
+  while true
+  do
+    if \
+      sudo VBoxManage showvminfo --machinereadable minikube \
+      | grep -m1 -q '^VMState="paused"'
+    then
+      mklf --tail=100 "${1}"
+      echo 'Exited kubectl logs'
+    fi
+    sleep_tagged minikube_vbox
+  done
+}
 
 function work-hours() {
   cat "${@:-${HOME}/work.yaml}" | yaml2json - | jq '((([.[] | ."Home time",."Office time" | .Ranges | .[]? | .Duration | strings | ((capture("(?<amount>[0-9]+)m") | .amount | tonumber), (capture("(?<amount>[0-9]+)h") | .amount | tonumber | . * 60))] | add) // 0) - (8 * 60 * ([.[] | .Day | values] | length))) / 60'
@@ -398,6 +625,39 @@ function work-expenses-plot() {
   cat "${@:-${HOME}/work.yaml}" | yaml2json - | jq -r 'map_values(.. | .Amount? | (strings | capture("(?<amount>[0-9]+)") | .amount | tonumber) // 0) | to_entries | .[] | .key + " " + (.value | tostring)' | sort -n | gnuplot -p -e 'set xdata time; set timefmt "%Y-%m-%d"; set offset graph 0.05, 0.05, 0.05, 0.05; set xzeroaxis; set title ""; plot "<cat" using 1:2 notitle'
 }
 
+alias ag-zalando-hostname="ag -ui '([a-z]([a-z0-9]*|[a-z0-9-]*[a-z0-9]+)\.)+(pp|zalan\.do|zalando\.([a-z][a-z][a-z]?|co\.[a-z][a-z])|zalando)\b\.?(?=[^.a-z0-9]|$)'"
+
+function ghclone() {
+  (
+    cd ~/stuff/code/repo/github.com &&
+    git clone "git@github.com:${1}" "${1}"
+  )
+}
+
+function zclone() {
+  (
+    cd ~/'stuff/code/repo/github.bus.zalan.do' &&
+    git clone "git@github.bus.zalan.do:${1}" "${1}"
+  )
+}
+
+function docker_pids() {
+  if [[ "${#}" != 1 ]]
+  then
+    printf 'Usage: %s CONTAINER\n' "${0}"
+    return 1
+  fi
+  awk \
+    '/NSpid/ { print $2, $3; }' \
+    $(
+      pgrep \
+        --parent "$(docker inspect --format '{{.State.Pid}}' "${1}")" \
+        2> /dev/null \
+      | sed -e 's@.*@/proc/&/status@'
+    ) \
+  | column -t
+}
+
 
 
 zle -C all-matches complete-word _my_generic
@@ -408,3 +668,9 @@ _my_generic () {
   _generic "$@"
 }
 bindkey '^X^a' all-matches
+
+
+# Fix ag, aliased to apt-get in the Ubuntu Oh My Zsh plugin:
+unalias ag
+
+eval $(thefuck --alias)
