@@ -436,6 +436,7 @@ alias mkpf='mk port-forward'
 
 alias zk='zkubectl'
 alias zkg='zk get -a -o wide --show-labels'
+alias zkgo='zkg --output=''jsonpath={.items..metadata.name}'''
 alias zkgp='zkg pods'
 alias zkgpo='zkgp --output=''jsonpath={.items..metadata.name}'''
 alias zkga='zkg all'
@@ -646,11 +647,19 @@ function ghclone() {
   )
 }
 
+function cdg() {
+  cd ~/"stuff/code/repo/github.com/${1}"
+}
+
 function zclone() {
   (
     cd ~/'stuff/code/repo/github.bus.zalan.do' &&
     git clone "git@github.bus.zalan.do:${1}" "${1}"
   )
+}
+
+function cdz() {
+  cd ~/"stuff/code/repo/github.bus.zalan.do/${1}"
 }
 
 function docker_pids() {
