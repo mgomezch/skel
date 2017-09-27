@@ -695,3 +695,11 @@ bindkey '^X^a' all-matches
 unalias ag
 
 eval $(thefuck --alias)
+
+
+
+if [ -z "${ZSH_COWSAY_DONE+1}" ]
+then
+  export ZSH_COWSAY_DONE=1
+  fortune | cowsay
+fi
