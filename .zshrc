@@ -396,16 +396,31 @@ alias nstl='sudo netstat -tnlp'
 
 alias lines="tr ' ' '\n'"
 
+
+
 alias k='kubectl'
-alias kg='k get -a -o wide --show-labels'
+
+alias kg='k get --show-all --output=wide --show-labels'
+alias kgj='kg --output=json'
+alias kgy='kg --output=yaml'
+alias kgn='kg --output=name'
+
+alias kgp='kg pods'
+alias kgpj='kgj pods'
+alias kgpy='kgy pods'
+alias kgpn='kgn pods'
+
 alias kga='kg all'
-alias kgj='kg -o json'
-alias kgaj='kga -o json'
+alias kgaj='kgj all'
+alias kgay='kgy all'
+alias kgan='kgn all'
+
 alias kd='k describe'
 alias kD='k delete'
 alias kE='k edit'
-alias kc='k create'
-alias kcf='kc -f'
+alias kC='k create'
+alias kCf='kc -f'
+
 alias kl='k logs'
 alias klf='kl --follow'
 alias kt='k top'
@@ -415,18 +430,239 @@ alias kcfg='kconf'
 alias kr='k run'
 alias kpf='k port-forward'
 
+function kbash() {
+  ke "${@}" -- bash
+}
+alias kb='kbash'
+
+function kpsql() {
+  ke "${@}" -- sudo -i -u postgres -- psql
+}
+alias kq='kpsql'
+
+alias kspilos='kgp --selector=''application=spilo'''
+alias kspilosj='kgpj --selector=''application=spilo'''
+alias kspilosy='kgpy --selector=''application=spilo'''
+alias kspilosn='kgpn --selector=''application=spilo'''
+alias kss='kspilos'
+alias kssj='kspilosj'
+alias kssy='kspilosy'
+alias kssn='kspilosn'
+
+alias kspilosprimary='kgp --selector=''application=spilo,spilo-role=master'''
+alias kspilosprimaryj='kgpj --selector=''application=spilo,spilo-role=master'''
+alias kspilosprimaryy='kgpy --selector=''application=spilo,spilo-role=master'''
+alias kspilosprimaryn='kgpn --selector=''application=spilo,spilo-role=master'''
+alias kssp='kspilosprimary'
+alias ksspj='kspilosprimaryj'
+alias ksspy='kspilosprimaryy'
+alias ksspn='kspilosprimaryn'
+
+alias kspilosreplica='kgp --selector=''application=spilo,spilo-role=replica'''
+alias kssr='kspilosreplica'
+alias ksspn='kssp --output=name'
+alias kssrn='kssr --output=name'
+alias kssop='ksspn'
+alias kssor='kssrn'
+
+function kspilo() {
+  pg_cluster_name="${1}"
+  if shift
+  then
+    kgp --selector="application=spilo,version=${pg_cluster_name}" "${@}"
+  else
+    echo "usage: ${0} cluster_name" >&2
+  fi
+}
+function kspiloj() {
+  pg_cluster_name="${1}"
+  if shift
+  then
+    kgpj --selector="application=spilo,version=${pg_cluster_name}" "${@}"
+  else
+    echo "usage: ${0} cluster_name" >&2
+  fi
+}
+function kspiloy() {
+  pg_cluster_name="${1}"
+  if shift
+  then
+    kgpy --selector="application=spilo,version=${pg_cluster_name}" "${@}"
+  else
+    echo "usage: ${0} cluster_name" >&2
+  fi
+}
+function kspilon() {
+  pg_cluster_name="${1}"
+  if shift
+  then
+    kgpn --selector="application=spilo,version=${pg_cluster_name}" "${@}"
+  else
+    echo "usage: ${0} cluster_name" >&2
+  fi
+}
+alias ks='kspilo'
+alias ksj='kspiloj'
+alias ksy='kspiloy'
+alias ksn='kspilon'
+
+function kspiloprimary() {
+  pg_cluster_name="${1}"
+  if shift
+  then
+    kgp "${@}" --selector="application=spilo,version=${pg_cluster_name},spilo-role=master"
+  else
+    echo "usage: ${0} cluster_name" >&2
+  fi
+}
+function kspiloprimaryj() {
+  pg_cluster_name="${1}"
+  if shift
+  then
+    kgpj "${@}" --selector="application=spilo,version=${pg_cluster_name},spilo-role=master"
+  else
+    echo "usage: ${0} cluster_name" >&2
+  fi
+}
+function kspiloprimaryy() {
+  pg_cluster_name="${1}"
+  if shift
+  then
+    kgpy "${@}" --selector="application=spilo,version=${pg_cluster_name},spilo-role=master"
+  else
+    echo "usage: ${0} cluster_name" >&2
+  fi
+}
+function kspiloprimaryn() {
+  pg_cluster_name="${1}"
+  if shift
+  then
+    kgpn "${@}" --selector="application=spilo,version=${pg_cluster_name},spilo-role=master"
+  else
+    echo "usage: ${0} cluster_name" >&2
+  fi
+}
+alias ksp='kspiloprimary'
+alias kspj='kspiloprimaryj'
+alias kspy='kspiloprimaryy'
+alias kspn='kspiloprimaryn'
+
+function kspiloreplica() {
+  pg_cluster_name="${1}"
+  if shift
+  then
+    kgp "${@}" --selector="application=spilo,version=${pg_cluster_name},spilo-role=replica"
+  else
+    echo "usage: ${0} cluster_name" >&2
+  fi
+}
+function kspiloreplicaj() {
+  pg_cluster_name="${1}"
+  if shift
+  then
+    kgpj "${@}" --selector="application=spilo,version=${pg_cluster_name},spilo-role=replica"
+  else
+    echo "usage: ${0} cluster_name" >&2
+  fi
+}
+function kspiloreplicay() {
+  pg_cluster_name="${1}"
+  if shift
+  then
+    kgpy "${@}" --selector="application=spilo,version=${pg_cluster_name},spilo-role=replica"
+  else
+    echo "usage: ${0} cluster_name" >&2
+  fi
+}
+function kspiloreplican() {
+  pg_cluster_name="${1}"
+  if shift
+  then
+    kgpn "${@}" --selector="application=spilo,version=${pg_cluster_name},spilo-role=replica"
+  else
+    echo "usage: ${0} cluster_name" >&2
+  fi
+}
+alias ksr='kspiloreplica'
+alias ksrj='kspiloreplicaj'
+alias ksry='kspiloreplicay'
+alias ksrn='kspiloreplican'
+
+function klspiloprimary() {
+  pg_cluster_name="${1}"
+  if shift
+  then
+    kl "$(kspn "${pg_cluster_name}")" "${@}"
+  else
+    echo "usage: ${0} cluster_name" >&2
+  fi
+}
+alias klsp='klspiloprimary'
+alias kspl='klsp'
+
+function kespiloprimary() {
+  pg_cluster_name="${1}"
+  if shift
+  then
+    ke "$(kspn "${pg_cluster_name}")" "${@}"
+  else
+    echo "usage: ${0} cluster_name" >&2
+  fi
+}
+alias kesp='kespiloprimary'
+alias kspe='kesp'
+
+function kspiloprimarybash() {
+  kesp "${@}" -- bash
+}
+alias kspb='kspiloprimarybash'
+alias kbsp='kspb'
+
+function kspiloprimarypsql() {
+  kesp "${@}" -- sudo -i -u postgres -- psql
+}
+alias kspq='kspiloprimarypsql'
+alias kqsp='kspq'
+
+function kspilopatronictl() {
+  pg_cluster_name="${1}"
+  patronictl_command="${2}"
+  if shift && shift
+  then
+    ke "$(ksn "${pg_cluster_name}" | lines | head -n 1)" -- sudo -i -u postgres -- patronictl "${patronictl_command}" "${pg_cluster_name}" "${@}"
+  else
+    echo "usage: ${0} cluster_name patronictl_command" >&2
+  fi
+}
+alias ksc='kspilopatronictl'
+
+
+
 alias kmini='kcfg use-context minikube'
 
-alias mk='kubectl --context=minikube'
-alias mkg='mk get -a -o wide --show-labels'
+alias mk='mkubectl'
+
+alias mkg='mk get --show-all --output=wide --show-labels'
+alias mkgj='mkg --output=json'
+alias mkgy='mkg --output=yaml'
+alias mkgn='mkg --output=name'
+
+alias mkgp='mkg pods'
+alias mkgpj='mkgj pods'
+alias mkgpy='mkgy pods'
+alias mkgpn='mkgn pods'
+
 alias mkga='mkg all'
-alias mkgj='mkg -o json'
-alias mkgaj='mkga -o json'
+alias mkgaj='mkgj all'
+alias mkgay='mkgy all'
+alias mkgan='mkgn all'
+
 alias mkd='mk describe'
 alias mkD='mk delete'
 alias mkE='mk edit'
-alias mkc='mk create'
-alias mkcf='mkc -f'
+alias mkC='mk create'
+alias mkCf='mkc -f'
+
 alias mkl='mk logs'
 alias mklf='mkl --follow'
 alias mkt='mk top'
@@ -436,19 +672,237 @@ alias mkcfg='mkconf'
 alias mkr='mk run'
 alias mkpf='mk port-forward'
 
+function mkbash() {
+  mke "${@}" -- bash
+}
+alias mkb='mkbash'
+
+function mkpsql() {
+  mke "${@}" -- sudo -i -u postgres -- psql
+}
+alias mkq='mkpsql'
+
+alias mkspilos='mkgp --selector=''application=spilo'''
+alias mkspilosj='mkgpj --selector=''application=spilo'''
+alias mkspilosy='mkgpy --selector=''application=spilo'''
+alias mkspilosn='mkgpn --selector=''application=spilo'''
+alias mkss='mkspilos'
+alias mkssj='mkspilosj'
+alias mkssy='mkspilosy'
+alias mkssn='mkspilosn'
+
+alias mkspilosprimary='mkgp --selector=''application=spilo,spilo-role=master'''
+alias mkspilosprimaryj='mkgpj --selector=''application=spilo,spilo-role=master'''
+alias mkspilosprimaryy='mkgpy --selector=''application=spilo,spilo-role=master'''
+alias mkspilosprimaryn='mkgpn --selector=''application=spilo,spilo-role=master'''
+alias mkssp='mkspilosprimary'
+alias mksspj='mkspilosprimaryj'
+alias mksspy='mkspilosprimaryy'
+alias mksspn='mkspilosprimaryn'
+
+alias mkspilosreplica='mkgp --selector=''application=spilo,spilo-role=replica'''
+alias mkssr='mkspilosreplica'
+alias mksspn='mkssp --output=name'
+alias mkssrn='mkssr --output=name'
+alias mkssop='mksspn'
+alias mkssor='mkssrn'
+
+function mkspilo() {
+  pg_cluster_name="${1}"
+  if shift
+  then
+    mkgp --selector="application=spilo,version=${pg_cluster_name}" "${@}"
+  else
+    echo "usage: ${0} cluster_name" >&2
+  fi
+}
+function mkspiloj() {
+  pg_cluster_name="${1}"
+  if shift
+  then
+    mkgpj --selector="application=spilo,version=${pg_cluster_name}" "${@}"
+  else
+    echo "usage: ${0} cluster_name" >&2
+  fi
+}
+function mkspiloy() {
+  pg_cluster_name="${1}"
+  if shift
+  then
+    mkgpy --selector="application=spilo,version=${pg_cluster_name}" "${@}"
+  else
+    echo "usage: ${0} cluster_name" >&2
+  fi
+}
+function mkspilon() {
+  pg_cluster_name="${1}"
+  if shift
+  then
+    mkgpn --selector="application=spilo,version=${pg_cluster_name}" "${@}"
+  else
+    echo "usage: ${0} cluster_name" >&2
+  fi
+}
+alias mks='mkspilo'
+alias mksj='mkspiloj'
+alias mksy='mkspiloy'
+alias mksn='mkspilon'
+
+function mkspiloprimary() {
+  pg_cluster_name="${1}"
+  if shift
+  then
+    mkgp "${@}" --selector="application=spilo,version=${pg_cluster_name},spilo-role=master"
+  else
+    echo "usage: ${0} cluster_name" >&2
+  fi
+}
+function mkspiloprimaryj() {
+  pg_cluster_name="${1}"
+  if shift
+  then
+    mkgpj "${@}" --selector="application=spilo,version=${pg_cluster_name},spilo-role=master"
+  else
+    echo "usage: ${0} cluster_name" >&2
+  fi
+}
+function mkspiloprimaryy() {
+  pg_cluster_name="${1}"
+  if shift
+  then
+    mkgpy "${@}" --selector="application=spilo,version=${pg_cluster_name},spilo-role=master"
+  else
+    echo "usage: ${0} cluster_name" >&2
+  fi
+}
+function mkspiloprimaryn() {
+  pg_cluster_name="${1}"
+  if shift
+  then
+    mkgpn "${@}" --selector="application=spilo,version=${pg_cluster_name},spilo-role=master"
+  else
+    echo "usage: ${0} cluster_name" >&2
+  fi
+}
+alias mksp='mkspiloprimary'
+alias mkspj='mkspiloprimaryj'
+alias mkspy='mkspiloprimaryy'
+alias mkspn='mkspiloprimaryn'
+
+function mkspiloreplica() {
+  pg_cluster_name="${1}"
+  if shift
+  then
+    mkgp "${@}" --selector="application=spilo,version=${pg_cluster_name},spilo-role=replica"
+  else
+    echo "usage: ${0} cluster_name" >&2
+  fi
+}
+function mkspiloreplicaj() {
+  pg_cluster_name="${1}"
+  if shift
+  then
+    mkgpj "${@}" --selector="application=spilo,version=${pg_cluster_name},spilo-role=replica"
+  else
+    echo "usage: ${0} cluster_name" >&2
+  fi
+}
+function mkspiloreplicay() {
+  pg_cluster_name="${1}"
+  if shift
+  then
+    mkgpy "${@}" --selector="application=spilo,version=${pg_cluster_name},spilo-role=replica"
+  else
+    echo "usage: ${0} cluster_name" >&2
+  fi
+}
+function mkspiloreplican() {
+  pg_cluster_name="${1}"
+  if shift
+  then
+    mkgpn "${@}" --selector="application=spilo,version=${pg_cluster_name},spilo-role=replica"
+  else
+    echo "usage: ${0} cluster_name" >&2
+  fi
+}
+alias mksr='mkspiloreplica'
+alias mksrj='mkspiloreplicaj'
+alias mksry='mkspiloreplicay'
+alias mksrn='mkspiloreplican'
+
+function mklspiloprimary() {
+  pg_cluster_name="${1}"
+  if shift
+  then
+    mkl "$(mkspn "${pg_cluster_name}")" "${@}"
+  else
+    echo "usage: ${0} cluster_name" >&2
+  fi
+}
+alias mklsp='mklspiloprimary'
+alias mkspl='mklsp'
+
+function mkespiloprimary() {
+  pg_cluster_name="${1}"
+  if shift
+  then
+    mke "$(mkspn "${pg_cluster_name}")" "${@}"
+  else
+    echo "usage: ${0} cluster_name" >&2
+  fi
+}
+alias mkesp='mkespiloprimary'
+alias mkspe='mkesp'
+
+function mkspiloprimarybash() {
+  mkesp "${@}" -- bash
+}
+alias mkspb='mkspiloprimarybash'
+alias mkbsp='mkspb'
+
+function mkspiloprimarypsql() {
+  mkesp "${@}" -- sudo -i -u postgres -- psql
+}
+alias mkspq='mkspiloprimarypsql'
+alias mkqsp='mkspq'
+
+function mkspilopatronictl() {
+  pg_cluster_name="${1}"
+  patronictl_command="${2}"
+  if shift && shift
+  then
+    mke "$(mksn "${pg_cluster_name}" | lines | head -n 1)" -- sudo -i -u postgres -- patronictl "${patronictl_command}" "${pg_cluster_name}" "${@}"
+  else
+    echo "usage: ${0} cluster_name patronictl_command" >&2
+  fi
+}
+alias mksc='mkspilopatronictl'
+
+
+
 alias zk='zkubectl'
-alias zkg='zk get -a -o wide --show-labels'
-alias zkgo='zkg --output=''jsonpath={.items..metadata.name}'''
+
+alias zkg='zk get --show-all --output=wide --show-labels'
+alias zkgj='zkg --output=json'
+alias zkgy='zkg --output=yaml'
+alias zkgn='zkg --output=name'
+
 alias zkgp='zkg pods'
-alias zkgpo='zkgp --output=''jsonpath={.items..metadata.name}'''
+alias zkgpj='zkgj pods'
+alias zkgpy='zkgy pods'
+alias zkgpn='zkgn pods'
+
 alias zkga='zkg all'
-alias zkgj='zkg -o json'
-alias zkgaj='zkga -o json'
+alias zkgaj='zkgj all'
+alias zkgay='zkgy all'
+alias zkgan='zkgn all'
+
 alias zkd='zk describe'
 alias zkD='zk delete'
 alias zkE='zk edit'
-alias zkc='zk create'
-alias zkcf='zkc -f'
+alias zkC='zk create'
+alias zkCf='zkc -f'
+
 alias zkl='zk logs'
 alias zklf='zkl --follow'
 alias zkt='zk top'
@@ -458,17 +912,40 @@ alias zkcfg='zkconf'
 alias zkr='zk run'
 alias zkpf='zk port-forward'
 
+function zkbash() {
+  zke "${@}" -- bash
+}
+alias zkb='zkbash'
+
+function zkpsql() {
+  zke "${@}" -- sudo -i -u postgres -- psql
+}
+alias zkq='zkpsql'
+
 alias zkspilos='zkgp --selector=''application=spilo'''
+alias zkspilosj='zkgpj --selector=''application=spilo'''
+alias zkspilosy='zkgpy --selector=''application=spilo'''
+alias zkspilosn='zkgpn --selector=''application=spilo'''
 alias zkss='zkspilos'
-alias zksso='zkss --output=''jsonpath={.items..metadata.name}'''
+alias zkssj='zkspilosj'
+alias zkssy='zkspilosy'
+alias zkssn='zkspilosn'
+
 alias zkspilosprimary='zkgp --selector=''application=spilo,spilo-role=master'''
-alias zkspilosreplica='zkgp --selector=''application=spilo,spilo-role=replica'''
+alias zkspilosprimaryj='zkgpj --selector=''application=spilo,spilo-role=master'''
+alias zkspilosprimaryy='zkgpy --selector=''application=spilo,spilo-role=master'''
+alias zkspilosprimaryn='zkgpn --selector=''application=spilo,spilo-role=master'''
 alias zkssp='zkspilosprimary'
+alias zksspj='zkspilosprimaryj'
+alias zksspy='zkspilosprimaryy'
+alias zksspn='zkspilosprimaryn'
+
+alias zkspilosreplica='zkgp --selector=''application=spilo,spilo-role=replica'''
 alias zkssr='zkspilosreplica'
-alias zksspo='zkssp --output=''jsonpath={.items..metadata.name}'''
-alias zkssro='zkssr --output=''jsonpath={.items..metadata.name}'''
-alias zkssop='zksspo'
-alias zkssor='zkssro'
+alias zksspn='zkssp --output=name'
+alias zkssrn='zkssr --output=name'
+alias zkssop='zksspn'
+alias zkssor='zkssrn'
 
 function zkspilo() {
   pg_cluster_name="${1}"
@@ -479,7 +956,37 @@ function zkspilo() {
     echo "usage: ${0} cluster_name" >&2
   fi
 }
+function zkspiloj() {
+  pg_cluster_name="${1}"
+  if shift
+  then
+    zkgpj --selector="application=spilo,version=${pg_cluster_name}" "${@}"
+  else
+    echo "usage: ${0} cluster_name" >&2
+  fi
+}
+function zkspiloy() {
+  pg_cluster_name="${1}"
+  if shift
+  then
+    zkgpy --selector="application=spilo,version=${pg_cluster_name}" "${@}"
+  else
+    echo "usage: ${0} cluster_name" >&2
+  fi
+}
+function zkspilon() {
+  pg_cluster_name="${1}"
+  if shift
+  then
+    zkgpn --selector="application=spilo,version=${pg_cluster_name}" "${@}"
+  else
+    echo "usage: ${0} cluster_name" >&2
+  fi
+}
 alias zks='zkspilo'
+alias zksj='zkspiloj'
+alias zksy='zkspiloy'
+alias zksn='zkspilon'
 
 function zkspiloprimary() {
   pg_cluster_name="${1}"
@@ -490,7 +997,37 @@ function zkspiloprimary() {
     echo "usage: ${0} cluster_name" >&2
   fi
 }
+function zkspiloprimaryj() {
+  pg_cluster_name="${1}"
+  if shift
+  then
+    zkgpj "${@}" --selector="application=spilo,version=${pg_cluster_name},spilo-role=master"
+  else
+    echo "usage: ${0} cluster_name" >&2
+  fi
+}
+function zkspiloprimaryy() {
+  pg_cluster_name="${1}"
+  if shift
+  then
+    zkgpy "${@}" --selector="application=spilo,version=${pg_cluster_name},spilo-role=master"
+  else
+    echo "usage: ${0} cluster_name" >&2
+  fi
+}
+function zkspiloprimaryn() {
+  pg_cluster_name="${1}"
+  if shift
+  then
+    zkgpn "${@}" --selector="application=spilo,version=${pg_cluster_name},spilo-role=master"
+  else
+    echo "usage: ${0} cluster_name" >&2
+  fi
+}
 alias zksp='zkspiloprimary'
+alias zkspj='zkspiloprimaryj'
+alias zkspy='zkspiloprimaryy'
+alias zkspn='zkspiloprimaryn'
 
 function zkspiloreplica() {
   pg_cluster_name="${1}"
@@ -501,49 +1038,43 @@ function zkspiloreplica() {
     echo "usage: ${0} cluster_name" >&2
   fi
 }
+function zkspiloreplicaj() {
+  pg_cluster_name="${1}"
+  if shift
+  then
+    zkgpj "${@}" --selector="application=spilo,version=${pg_cluster_name},spilo-role=replica"
+  else
+    echo "usage: ${0} cluster_name" >&2
+  fi
+}
+function zkspiloreplicay() {
+  pg_cluster_name="${1}"
+  if shift
+  then
+    zkgpy "${@}" --selector="application=spilo,version=${pg_cluster_name},spilo-role=replica"
+  else
+    echo "usage: ${0} cluster_name" >&2
+  fi
+}
+function zkspiloreplican() {
+  pg_cluster_name="${1}"
+  if shift
+  then
+    zkgpn "${@}" --selector="application=spilo,version=${pg_cluster_name},spilo-role=replica"
+  else
+    echo "usage: ${0} cluster_name" >&2
+  fi
+}
 alias zksr='zkspiloreplica'
-alias zksro='zksr'
-
-function zkspilopods() {
-  pg_cluster_name="${1}"
-  if shift
-  then
-    zkgpo --selector="application=spilo,version=${pg_cluster_name}" "${@}"
-  else
-    echo "usage: ${0} cluster_name" >&2
-  fi
-}
-alias zkso='zkspilopods'
-
-function zkspiloprimarypods() {
-  pg_cluster_name="${1}"
-  if shift
-  then
-    zkgpo "${@}" --selector="application=spilo,version=${pg_cluster_name},spilo-role=master"
-  else
-    echo "usage: ${0} cluster_name" >&2
-  fi
-}
-alias zkspo='zkspiloprimarypods'
-alias zksop='zkspo'
-
-function zkspiloreplicapods() {
-  pg_cluster_name="${1}"
-  if shift
-  then
-    zkgp "${@}" --selector="application=spilo,version=${pg_cluster_name},spilo-role=replica"
-  else
-    echo "usage: ${0} cluster_name" >&2
-  fi
-}
-alias zksro='zkspiloreplicapods'
-alias zksor='zksro'
+alias zksrj='zkspiloreplicaj'
+alias zksry='zkspiloreplicay'
+alias zksrn='zkspiloreplican'
 
 function zklspiloprimary() {
   pg_cluster_name="${1}"
   if shift
   then
-    zkl "$(zkspo "${pg_cluster_name}")" "${@}"
+    zkl "$(zkspn "${pg_cluster_name}")" "${@}"
   else
     echo "usage: ${0} cluster_name" >&2
   fi
@@ -555,7 +1086,7 @@ function zkespiloprimary() {
   pg_cluster_name="${1}"
   if shift
   then
-    zke "$(zkspo "${pg_cluster_name}")" "${@}"
+    zke "$(zkspn "${pg_cluster_name}")" "${@}"
   else
     echo "usage: ${0} cluster_name" >&2
   fi
@@ -563,21 +1094,11 @@ function zkespiloprimary() {
 alias zkesp='zkespiloprimary'
 alias zkspe='zkesp'
 
-function zkbash() {
-  zke "${@}" -- bash
-}
-alias zkb='zkbash'
-
 function zkspiloprimarybash() {
   zkesp "${@}" -- bash
 }
 alias zkspb='zkspiloprimarybash'
 alias zkbsp='zkspb'
-
-function zkpsql() {
-  zke "${@}" -- sudo -i -u postgres -- psql
-}
-alias zkq='zkpsql'
 
 function zkspiloprimarypsql() {
   zkesp "${@}" -- sudo -i -u postgres -- psql
@@ -590,12 +1111,14 @@ function zkspilopatronictl() {
   patronictl_command="${2}"
   if shift && shift
   then
-    zke "$(zkso "${pg_cluster_name}" | lines | head -n 1)" -- sudo -i -u postgres -- patronictl "${patronictl_command}" "${pg_cluster_name}" "${@}"
+    zke "$(zksn "${pg_cluster_name}" | lines | head -n 1)" -- sudo -i -u postgres -- patronictl "${patronictl_command}" "${pg_cluster_name}" "${@}"
   else
     echo "usage: ${0} cluster_name patronictl_command" >&2
   fi
 }
 alias zksc='zkspilopatronictl'
+
+
 
 function loop_mksh() {
   while true
