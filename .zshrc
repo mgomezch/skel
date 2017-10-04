@@ -640,7 +640,7 @@ alias ksc='kspilopatronictl'
 
 alias kmini='kcfg use-context minikube'
 
-alias mk='mkubectl'
+alias mk='kubectl --context=minikube'
 
 alias mkg='mk get --show-all --output=wide --show-labels'
 alias mkgj='mkg --output=json'
