@@ -398,72 +398,117 @@ alias lines="tr ' ' '\n'"
 
 
 
-alias k='kubectl'
+function k() { kubectl "${@}" }
 
-alias kg='k get --show-all --output=wide --show-labels'
-alias kgj='kg --output=json'
-alias kgy='kg --output=yaml'
-alias kgn='kg --output=name'
+function kg() { k get --show-all --output=wide --show-labels "${@}" }
+function kgj() { kg --output=json "${@}" }
+function kgy() { kg --output=yaml "${@}" }
+function kgn() { kg --output=name "${@}" }
 
-alias kgp='kg pods'
-alias kgpj='kgj pods'
-alias kgpy='kgy pods'
-alias kgpn='kgn pods'
+function kgp() { kg pods "${@}" }
+function kgpj() { kgj pods "${@}" }
+function kgpy() { kgy pods "${@}" }
+function kgpn() { kgn pods "${@}" }
 
-alias kga='kg all'
-alias kgaj='kgj all'
-alias kgay='kgy all'
-alias kgan='kgn all'
+function kga() { kg all "${@}" }
+function kgaj() { kgj all "${@}" }
+function kgay() { kgy all "${@}" }
+function kgan() { kgn all "${@}" }
 
-alias kd='k describe'
-alias kD='k delete'
-alias kE='k edit'
-alias kC='k create'
-alias kCf='kc -f'
+function kd() { k describe "${@}" }
+function kD() { k delete "${@}" }
+function kE() { k edit "${@}" }
+function kC() { k create "${@}" }
+function kCf() { kc -f "${@}" }
 
-alias kl='k logs'
-alias klf='kl --follow'
-alias kt='k top'
-alias ke='k exec -it'
-alias kconf='k config'
-alias kcfg='kconf'
-alias kr='k run'
-alias kpf='k port-forward'
+function kl() { k logs "${@}" }
+function klf() { kl --follow "${@}" }
+function kt() { k top "${@}" }
+function kconf() { k config "${@}" }
+function kcfg() { kconf "${@}" }
+function kr() { k run "${@}" }
+function kpf() { k port-forward "${@}" }
+
+function ke() { k exec -it "${@}" }
+
+function ksh() {
+  ke "${@}" -- sh
+}
 
 function kbash() {
   ke "${@}" -- bash
 }
-alias kb='kbash'
+function kb() { kbash "${@}" }
 
 function kpsql() {
   ke "${@}" -- sudo -i -u postgres -- psql
 }
-alias kq='kpsql'
+function kq() { kpsql "${@}" }
+
+function k_l() {
+  command="${1}"
+  selector="${2}"
+  if shift && shift
+  then
+    "${command}" "$(kgpn -l "${selector}" | sed -e 's@pods/@@' | head -n 1)" "${@}"
+  else
+    echo "usage: ${0} command selector" >&2
+    return 1
+  fi
+}
+
+function k_a() {
+  command="${1}"
+  application_name="${2}"
+  if shift && shift
+  then
+    k_l "${command}" "application=${application_name}" "${@}"
+  else
+    echo "usage: ${0} command application_name" >&2
+    return 1
+  fi
+}
+
+function kll() { k_l kl "${@}" }
+function kla() { k_a kl "${@}" }
+function klfl() { k_l klf "${@}" }
+function klfa() { k_a klf "${@}" }
+function kel() { k_l ke "${@}" }
+function kea() { k_a ke "${@}" }
+function kshl() { k_l ksh "${@}" }
+function ksha() { k_a ksh "${@}" }
+function kbl() { k_l kb "${@}" }
+function kba() { k_a kb "${@}" }
+
+function kpgopl() { kla postgres-operator "${@}" }
+function kpgoplf() { klfa postgres-operator "${@}" }
+function kpguil() { kla postgres-operator-ui "${@}" }
+function kpguilf() { klfa postgres-operator-ui "${@}" }
 
 alias kspilos='kgp --selector=''application=spilo'''
 alias kspilosj='kgpj --selector=''application=spilo'''
 alias kspilosy='kgpy --selector=''application=spilo'''
 alias kspilosn='kgpn --selector=''application=spilo'''
-alias kss='kspilos'
-alias kssj='kspilosj'
-alias kssy='kspilosy'
-alias kssn='kspilosn'
+function kss() { kspilos "${@}" }
+function kssj() { kspilosj "${@}" }
+function kssy() { kspilosy "${@}" }
+function kssn() { kspilosn "${@}" }
 
 alias kspilosprimary='kgp --selector=''application=spilo,spilo-role=master'''
 alias kspilosprimaryj='kgpj --selector=''application=spilo,spilo-role=master'''
 alias kspilosprimaryy='kgpy --selector=''application=spilo,spilo-role=master'''
 alias kspilosprimaryn='kgpn --selector=''application=spilo,spilo-role=master'''
-alias kssp='kspilosprimary'
-alias ksspj='kspilosprimaryj'
-alias ksspy='kspilosprimaryy'
-alias ksspn='kspilosprimaryn'
+function kssp() { kspilosprimary "${@}" }
+function ksspj() { kspilosprimaryj "${@}" }
+function ksspy() { kspilosprimaryy "${@}" }
+function ksspn() { kspilosprimaryn "${@}" }
 
 alias kspilosreplica='kgp --selector=''application=spilo,spilo-role=replica'''
-alias kssr='kspilosreplica'
-alias ksspn='kssp --output=name'
-alias kssrn='kssr --output=name'
-alias kssop='ksspn'
-alias kssor='kssrn'
+function kssr() { kspilosreplica "${@}" }
+function ksspn() { kssp --output=name "${@}" }
+function kssrn() { kssr --output=name "${@}" }
+function kssop() { ksspn "${@}" }
+function kssor() { kssrn "${@}" }
 
 function kspilo() {
   pg_cluster_name="${1}"
@@ -472,6 +517,7 @@ function kspilo() {
     kgp --selector="application=spilo,version=${pg_cluster_name}" "${@}"
   else
     echo "usage: ${0} cluster_name" >&2
+    return 1
   fi
 }
 function kspiloj() {
@@ -481,6 +527,7 @@ function kspiloj() {
     kgpj --selector="application=spilo,version=${pg_cluster_name}" "${@}"
   else
     echo "usage: ${0} cluster_name" >&2
+    return 1
   fi
 }
 function kspiloy() {
@@ -490,6 +537,7 @@ function kspiloy() {
     kgpy --selector="application=spilo,version=${pg_cluster_name}" "${@}"
   else
     echo "usage: ${0} cluster_name" >&2
+    return 1
   fi
 }
 function kspilon() {
@@ -499,12 +547,13 @@ function kspilon() {
     kgpn --selector="application=spilo,version=${pg_cluster_name}" "${@}"
   else
     echo "usage: ${0} cluster_name" >&2
+    return 1
   fi
 }
-alias ks='kspilo'
-alias ksj='kspiloj'
-alias ksy='kspiloy'
-alias ksn='kspilon'
+function ks() { kspilo "${@}" }
+function ksj() { kspiloj "${@}" }
+function ksy() { kspiloy "${@}" }
+function ksn() { kspilon "${@}" }
 
 function kspiloprimary() {
   pg_cluster_name="${1}"
@@ -513,6 +562,7 @@ function kspiloprimary() {
     kgp "${@}" --selector="application=spilo,version=${pg_cluster_name},spilo-role=master"
   else
     echo "usage: ${0} cluster_name" >&2
+    return 1
   fi
 }
 function kspiloprimaryj() {
@@ -522,6 +572,7 @@ function kspiloprimaryj() {
     kgpj "${@}" --selector="application=spilo,version=${pg_cluster_name},spilo-role=master"
   else
     echo "usage: ${0} cluster_name" >&2
+    return 1
   fi
 }
 function kspiloprimaryy() {
@@ -531,6 +582,7 @@ function kspiloprimaryy() {
     kgpy "${@}" --selector="application=spilo,version=${pg_cluster_name},spilo-role=master"
   else
     echo "usage: ${0} cluster_name" >&2
+    return 1
   fi
 }
 function kspiloprimaryn() {
@@ -540,12 +592,13 @@ function kspiloprimaryn() {
     kgpn "${@}" --selector="application=spilo,version=${pg_cluster_name},spilo-role=master"
   else
     echo "usage: ${0} cluster_name" >&2
+    return 1
   fi
 }
-alias ksp='kspiloprimary'
-alias kspj='kspiloprimaryj'
-alias kspy='kspiloprimaryy'
-alias kspn='kspiloprimaryn'
+function ksp() { kspiloprimary "${@}" }
+function kspj() { kspiloprimaryj "${@}" }
+function kspy() { kspiloprimaryy "${@}" }
+function kspn() { kspiloprimaryn "${@}" }
 
 function kspiloreplica() {
   pg_cluster_name="${1}"
@@ -554,6 +607,7 @@ function kspiloreplica() {
     kgp "${@}" --selector="application=spilo,version=${pg_cluster_name},spilo-role=replica"
   else
     echo "usage: ${0} cluster_name" >&2
+    return 1
   fi
 }
 function kspiloreplicaj() {
@@ -563,6 +617,7 @@ function kspiloreplicaj() {
     kgpj "${@}" --selector="application=spilo,version=${pg_cluster_name},spilo-role=replica"
   else
     echo "usage: ${0} cluster_name" >&2
+    return 1
   fi
 }
 function kspiloreplicay() {
@@ -572,6 +627,7 @@ function kspiloreplicay() {
     kgpy "${@}" --selector="application=spilo,version=${pg_cluster_name},spilo-role=replica"
   else
     echo "usage: ${0} cluster_name" >&2
+    return 1
   fi
 }
 function kspiloreplican() {
@@ -581,12 +637,13 @@ function kspiloreplican() {
     kgpn "${@}" --selector="application=spilo,version=${pg_cluster_name},spilo-role=replica"
   else
     echo "usage: ${0} cluster_name" >&2
+    return 1
   fi
 }
-alias ksr='kspiloreplica'
-alias ksrj='kspiloreplicaj'
-alias ksry='kspiloreplicay'
-alias ksrn='kspiloreplican'
+function ksr() { kspiloreplica "${@}" }
+function ksrj() { kspiloreplicaj "${@}" }
+function ksry() { kspiloreplicay "${@}" }
+function ksrn() { kspiloreplican "${@}" }
 
 function klspiloprimary() {
   pg_cluster_name="${1}"
@@ -595,10 +652,11 @@ function klspiloprimary() {
     kl "$(kspn "${pg_cluster_name}")" "${@}"
   else
     echo "usage: ${0} cluster_name" >&2
+    return 1
   fi
 }
-alias klsp='klspiloprimary'
-alias kspl='klsp'
+function klsp() { klspiloprimary "${@}" }
+function kspl() { klsp "${@}" }
 
 function kespiloprimary() {
   pg_cluster_name="${1}"
@@ -607,22 +665,23 @@ function kespiloprimary() {
     ke "$(kspn "${pg_cluster_name}")" "${@}"
   else
     echo "usage: ${0} cluster_name" >&2
+    return 1
   fi
 }
-alias kesp='kespiloprimary'
-alias kspe='kesp'
+function kesp() { kespiloprimary "${@}" }
+function kspe() { kesp "${@}" }
 
 function kspiloprimarybash() {
   kesp "${@}" -- bash
 }
-alias kspb='kspiloprimarybash'
-alias kbsp='kspb'
+function kspb() { kspiloprimarybash "${@}" }
+function kbsp() { kspb "${@}" }
 
 function kspiloprimarypsql() {
   kesp "${@}" -- sudo -i -u postgres -- psql
 }
-alias kspq='kspiloprimarypsql'
-alias kqsp='kspq'
+function kspq() { kspiloprimarypsql "${@}" }
+function kqsp() { kspq "${@}" }
 
 function kspilopatronictl() {
   pg_cluster_name="${1}"
@@ -632,80 +691,125 @@ function kspilopatronictl() {
     ke "$(ksn "${pg_cluster_name}" | lines | head -n 1)" -- sudo -i -u postgres -- patronictl "${patronictl_command}" "${pg_cluster_name}" "${@}"
   else
     echo "usage: ${0} cluster_name patronictl_command" >&2
+    return 1
   fi
 }
-alias ksc='kspilopatronictl'
+function ksc() { kspilopatronictl "${@}" }
 
 
 
-alias kmini='kcfg use-context minikube'
+function kmini() { kcfg use-context minikube "${@}" }
 
-alias mk='kubectl --context=minikube'
+function mk() { kubectl --context=minikube "${@}" }
 
-alias mkg='mk get --show-all --output=wide --show-labels'
-alias mkgj='mkg --output=json'
-alias mkgy='mkg --output=yaml'
-alias mkgn='mkg --output=name'
+function mkg() { mk get --show-all --output=wide --show-labels "${@}" }
+function mkgj() { mkg --output=json "${@}" }
+function mkgy() { mkg --output=yaml "${@}" }
+function mkgn() { mkg --output=name "${@}" }
 
-alias mkgp='mkg pods'
-alias mkgpj='mkgj pods'
-alias mkgpy='mkgy pods'
-alias mkgpn='mkgn pods'
+function mkgp() { mkg pods "${@}" }
+function mkgpj() { mkgj pods "${@}" }
+function mkgpy() { mkgy pods "${@}" }
+function mkgpn() { mkgn pods "${@}" }
 
-alias mkga='mkg all'
-alias mkgaj='mkgj all'
-alias mkgay='mkgy all'
-alias mkgan='mkgn all'
+function mkga() { mkg all "${@}" }
+function mkgaj() { mkgj all "${@}" }
+function mkgay() { mkgy all "${@}" }
+function mkgan() { mkgn all "${@}" }
 
-alias mkd='mk describe'
-alias mkD='mk delete'
-alias mkE='mk edit'
-alias mkC='mk create'
-alias mkCf='mkc -f'
+function mkd() { mk describe "${@}" }
+function mkD() { mk delete "${@}" }
+function mkE() { mk edit "${@}" }
+function mkC() { mk create "${@}" }
+function mkCf() { mkc -f "${@}" }
 
-alias mkl='mk logs'
-alias mklf='mkl --follow'
-alias mkt='mk top'
-alias mke='mk exec -it'
-alias mkconf='mk config'
-alias mkcfg='mkconf'
-alias mkr='mk run'
-alias mkpf='mk port-forward'
+function mkl() { mk logs "${@}" }
+function mklf() { mkl --follow "${@}" }
+function mkt() { mk top "${@}" }
+function mke() { mk exec -it "${@}" }
+function mkconf() { mk config "${@}" }
+function mkcfg() { mkconf "${@}" }
+function mkr() { mk run "${@}" }
+function mkpf() { mk port-forward "${@}" }
+
+function mksh() {
+  mke "${@}" -- sh
+}
 
 function mkbash() {
   mke "${@}" -- bash
 }
-alias mkb='mkbash'
+function mkb() { mkbash "${@}" }
 
 function mkpsql() {
   mke "${@}" -- sudo -i -u postgres -- psql
 }
-alias mkq='mkpsql'
+function mkq() { mkpsql "${@}" }
+
+function mk_l() {
+  command="${1}"
+  selector="${2}"
+  if shift && shift
+  then
+    "${command}" "$(mkgpn -l "${selector}" | sed -e 's@pods/@@' | head -n 1)" "${@}"
+  else
+    echo "usage: ${0} command selector" >&2
+    return 1
+  fi
+}
+
+function mk_a() {
+  command="${1}"
+  application_name="${2}"
+  if shift && shift
+  then
+    mk_l "${command}" "application=${application_name}" "${@}"
+  else
+    echo "usage: ${0} command application_name" >&2
+    return 1
+  fi
+}
+
+function mkll() { mk_l mkl "${@}" }
+function mkla() { mk_a mkl "${@}" }
+function mklfl() { mk_l mklf "${@}" }
+function mklfa() { mk_a mklf "${@}" }
+function mkel() { mk_l mke "${@}" }
+function mkea() { mk_a mke "${@}" }
+function mkshl() { mk_l mksh "${@}" }
+function mksha() { mk_a mksh "${@}" }
+function mkbl() { mk_l mkb "${@}" }
+function mkba() { mk_a mkb "${@}" }
+
+function mkpgopl() { mkla postgres-operator "${@}" }
+function mkpgoplf() { mklfa postgres-operator "${@}" }
+function mkpguil() { mkla postgres-operator-ui "${@}" }
+function mkpguilf() { mklfa postgres-operator-ui "${@}" }
 
 alias mkspilos='mkgp --selector=''application=spilo'''
 alias mkspilosj='mkgpj --selector=''application=spilo'''
 alias mkspilosy='mkgpy --selector=''application=spilo'''
 alias mkspilosn='mkgpn --selector=''application=spilo'''
-alias mkss='mkspilos'
-alias mkssj='mkspilosj'
-alias mkssy='mkspilosy'
-alias mkssn='mkspilosn'
+function mkss() { mkspilos "${@}" }
+function mkssj() { mkspilosj "${@}" }
+function mkssy() { mkspilosy "${@}" }
+function mkssn() { mkspilosn "${@}" }
 
 alias mkspilosprimary='mkgp --selector=''application=spilo,spilo-role=master'''
 alias mkspilosprimaryj='mkgpj --selector=''application=spilo,spilo-role=master'''
 alias mkspilosprimaryy='mkgpy --selector=''application=spilo,spilo-role=master'''
 alias mkspilosprimaryn='mkgpn --selector=''application=spilo,spilo-role=master'''
-alias mkssp='mkspilosprimary'
-alias mksspj='mkspilosprimaryj'
-alias mksspy='mkspilosprimaryy'
-alias mksspn='mkspilosprimaryn'
+function mkssp() { mkspilosprimary "${@}" }
+function mksspj() { mkspilosprimaryj "${@}" }
+function mksspy() { mkspilosprimaryy "${@}" }
+function mksspn() { mkspilosprimaryn "${@}" }
 
 alias mkspilosreplica='mkgp --selector=''application=spilo,spilo-role=replica'''
-alias mkssr='mkspilosreplica'
-alias mksspn='mkssp --output=name'
-alias mkssrn='mkssr --output=name'
-alias mkssop='mksspn'
-alias mkssor='mkssrn'
+function mkssr() { mkspilosreplica "${@}" }
+function mksspn() { mkssp --output=name "${@}" }
+function mkssrn() { mkssr --output=name "${@}" }
+function mkssop() { mksspn "${@}" }
+function mkssor() { mkssrn "${@}" }
 
 function mkspilo() {
   pg_cluster_name="${1}"
@@ -714,6 +818,7 @@ function mkspilo() {
     mkgp --selector="application=spilo,version=${pg_cluster_name}" "${@}"
   else
     echo "usage: ${0} cluster_name" >&2
+    return 1
   fi
 }
 function mkspiloj() {
@@ -723,6 +828,7 @@ function mkspiloj() {
     mkgpj --selector="application=spilo,version=${pg_cluster_name}" "${@}"
   else
     echo "usage: ${0} cluster_name" >&2
+    return 1
   fi
 }
 function mkspiloy() {
@@ -732,6 +838,7 @@ function mkspiloy() {
     mkgpy --selector="application=spilo,version=${pg_cluster_name}" "${@}"
   else
     echo "usage: ${0} cluster_name" >&2
+    return 1
   fi
 }
 function mkspilon() {
@@ -741,12 +848,13 @@ function mkspilon() {
     mkgpn --selector="application=spilo,version=${pg_cluster_name}" "${@}"
   else
     echo "usage: ${0} cluster_name" >&2
+    return 1
   fi
 }
-alias mks='mkspilo'
-alias mksj='mkspiloj'
-alias mksy='mkspiloy'
-alias mksn='mkspilon'
+function mks() { mkspilo "${@}" }
+function mksj() { mkspiloj "${@}" }
+function mksy() { mkspiloy "${@}" }
+function mksn() { mkspilon "${@}" }
 
 function mkspiloprimary() {
   pg_cluster_name="${1}"
@@ -755,6 +863,7 @@ function mkspiloprimary() {
     mkgp "${@}" --selector="application=spilo,version=${pg_cluster_name},spilo-role=master"
   else
     echo "usage: ${0} cluster_name" >&2
+    return 1
   fi
 }
 function mkspiloprimaryj() {
@@ -764,6 +873,7 @@ function mkspiloprimaryj() {
     mkgpj "${@}" --selector="application=spilo,version=${pg_cluster_name},spilo-role=master"
   else
     echo "usage: ${0} cluster_name" >&2
+    return 1
   fi
 }
 function mkspiloprimaryy() {
@@ -773,6 +883,7 @@ function mkspiloprimaryy() {
     mkgpy "${@}" --selector="application=spilo,version=${pg_cluster_name},spilo-role=master"
   else
     echo "usage: ${0} cluster_name" >&2
+    return 1
   fi
 }
 function mkspiloprimaryn() {
@@ -782,12 +893,13 @@ function mkspiloprimaryn() {
     mkgpn "${@}" --selector="application=spilo,version=${pg_cluster_name},spilo-role=master"
   else
     echo "usage: ${0} cluster_name" >&2
+    return 1
   fi
 }
-alias mksp='mkspiloprimary'
-alias mkspj='mkspiloprimaryj'
-alias mkspy='mkspiloprimaryy'
-alias mkspn='mkspiloprimaryn'
+function mksp() { mkspiloprimary "${@}" }
+function mkspj() { mkspiloprimaryj "${@}" }
+function mkspy() { mkspiloprimaryy "${@}" }
+function mkspn() { mkspiloprimaryn "${@}" }
 
 function mkspiloreplica() {
   pg_cluster_name="${1}"
@@ -796,6 +908,7 @@ function mkspiloreplica() {
     mkgp "${@}" --selector="application=spilo,version=${pg_cluster_name},spilo-role=replica"
   else
     echo "usage: ${0} cluster_name" >&2
+    return 1
   fi
 }
 function mkspiloreplicaj() {
@@ -805,6 +918,7 @@ function mkspiloreplicaj() {
     mkgpj "${@}" --selector="application=spilo,version=${pg_cluster_name},spilo-role=replica"
   else
     echo "usage: ${0} cluster_name" >&2
+    return 1
   fi
 }
 function mkspiloreplicay() {
@@ -814,6 +928,7 @@ function mkspiloreplicay() {
     mkgpy "${@}" --selector="application=spilo,version=${pg_cluster_name},spilo-role=replica"
   else
     echo "usage: ${0} cluster_name" >&2
+    return 1
   fi
 }
 function mkspiloreplican() {
@@ -823,12 +938,13 @@ function mkspiloreplican() {
     mkgpn "${@}" --selector="application=spilo,version=${pg_cluster_name},spilo-role=replica"
   else
     echo "usage: ${0} cluster_name" >&2
+    return 1
   fi
 }
-alias mksr='mkspiloreplica'
-alias mksrj='mkspiloreplicaj'
-alias mksry='mkspiloreplicay'
-alias mksrn='mkspiloreplican'
+function mksr() { mkspiloreplica "${@}" }
+function mksrj() { mkspiloreplicaj "${@}" }
+function mksry() { mkspiloreplicay "${@}" }
+function mksrn() { mkspiloreplican "${@}" }
 
 function mklspiloprimary() {
   pg_cluster_name="${1}"
@@ -837,10 +953,11 @@ function mklspiloprimary() {
     mkl "$(mkspn "${pg_cluster_name}")" "${@}"
   else
     echo "usage: ${0} cluster_name" >&2
+    return 1
   fi
 }
-alias mklsp='mklspiloprimary'
-alias mkspl='mklsp'
+function mklsp() { mklspiloprimary "${@}" }
+function mkspl() { mklsp "${@}" }
 
 function mkespiloprimary() {
   pg_cluster_name="${1}"
@@ -849,22 +966,23 @@ function mkespiloprimary() {
     mke "$(mkspn "${pg_cluster_name}")" "${@}"
   else
     echo "usage: ${0} cluster_name" >&2
+    return 1
   fi
 }
-alias mkesp='mkespiloprimary'
-alias mkspe='mkesp'
+function mkesp() { mkespiloprimary "${@}" }
+function mkspe() { mkesp "${@}" }
 
 function mkspiloprimarybash() {
   mkesp "${@}" -- bash
 }
-alias mkspb='mkspiloprimarybash'
-alias mkbsp='mkspb'
+function mkspb() { mkspiloprimarybash "${@}" }
+function mkbsp() { mkspb "${@}" }
 
 function mkspiloprimarypsql() {
   mkesp "${@}" -- sudo -i -u postgres -- psql
 }
-alias mkspq='mkspiloprimarypsql'
-alias mkqsp='mkspq'
+function mkspq() { mkspiloprimarypsql "${@}" }
+function mkqsp() { mkspq "${@}" }
 
 function mkspilopatronictl() {
   pg_cluster_name="${1}"
@@ -874,78 +992,123 @@ function mkspilopatronictl() {
     mke "$(mksn "${pg_cluster_name}" | lines | head -n 1)" -- sudo -i -u postgres -- patronictl "${patronictl_command}" "${pg_cluster_name}" "${@}"
   else
     echo "usage: ${0} cluster_name patronictl_command" >&2
+    return 1
   fi
 }
-alias mksc='mkspilopatronictl'
+function mksc() { mkspilopatronictl "${@}" }
 
 
 
-alias zk='zkubectl'
+function zk() { zkubectl "${@}" }
 
-alias zkg='zk get --show-all --output=wide --show-labels'
-alias zkgj='zkg --output=json'
-alias zkgy='zkg --output=yaml'
-alias zkgn='zkg --output=name'
+function zkg() { zk get --show-all --output=wide --show-labels "${@}" }
+function zkgj() { zkg --output=json "${@}" }
+function zkgy() { zkg --output=yaml "${@}" }
+function zkgn() { zkg --output=name "${@}" }
 
-alias zkgp='zkg pods'
-alias zkgpj='zkgj pods'
-alias zkgpy='zkgy pods'
-alias zkgpn='zkgn pods'
+function zkgp() { zkg pods "${@}" }
+function zkgpj() { zkgj pods "${@}" }
+function zkgpy() { zkgy pods "${@}" }
+function zkgpn() { zkgn pods "${@}" }
 
-alias zkga='zkg all'
-alias zkgaj='zkgj all'
-alias zkgay='zkgy all'
-alias zkgan='zkgn all'
+function zkga() { zkg all "${@}" }
+function zkgaj() { zkgj all "${@}" }
+function zkgay() { zkgy all "${@}" }
+function zkgan() { zkgn all "${@}" }
 
-alias zkd='zk describe'
-alias zkD='zk delete'
-alias zkE='zk edit'
-alias zkC='zk create'
-alias zkCf='zkc -f'
+function zkd() { zk describe "${@}" }
+function zkD() { zk delete "${@}" }
+function zkE() { zk edit "${@}" }
+function zkC() { zk create "${@}" }
+function zkCf() { zkc -f "${@}" }
 
-alias zkl='zk logs'
-alias zklf='zkl --follow'
-alias zkt='zk top'
-alias zke='zk exec -it'
-alias zkconf='zk config'
-alias zkcfg='zkconf'
-alias zkr='zk run'
-alias zkpf='zk port-forward'
+function zkl() { zk logs "${@}" }
+function zklf() { zkl --follow "${@}" }
+function zkt() { zk top "${@}" }
+function zke() { zk exec -it "${@}" }
+function zkconf() { zk config "${@}" }
+function zkcfg() { zkconf "${@}" }
+function zkr() { zk run "${@}" }
+function zkpf() { zk port-forward "${@}" }
+
+function zksh() {
+  zke "${@}" -- sh
+}
 
 function zkbash() {
   zke "${@}" -- bash
 }
-alias zkb='zkbash'
+function zkb() { zkbash "${@}" }
 
 function zkpsql() {
   zke "${@}" -- sudo -i -u postgres -- psql
 }
-alias zkq='zkpsql'
+function zkq() { zkpsql "${@}" }
+
+function zk_l() {
+  command="${1}"
+  selector="${2}"
+  if shift && shift
+  then
+    "${command}" "$(zkgpn -l "${selector}" | sed -e 's@pods/@@' | head -n 1)" "${@}"
+  else
+    echo "usage: ${0} command selector" >&2
+    return 1
+  fi
+}
+
+function zk_a() {
+  command="${1}"
+  application_name="${2}"
+  if shift && shift
+  then
+    zk_l "${command}" "application=${application_name}" "${@}"
+  else
+    echo "usage: ${0} command application_name" >&2
+    return 1
+  fi
+}
+
+function zkll() { zk_l zkl "${@}" }
+function zkla() { zk_a zkl "${@}" }
+function zklfl() { zk_l zklf "${@}" }
+function zklfa() { zk_a zklf "${@}" }
+function zkel() { zk_l zke "${@}" }
+function zkea() { zk_a zke "${@}" }
+function zkshl() { zk_l zksh "${@}" }
+function zksha() { zk_a zksh "${@}" }
+function zkbl() { zk_l zkb "${@}" }
+function zkba() { zk_a zkb "${@}" }
+
+function zkpgopl() { zkla postgres-operator "${@}" }
+function zkpgoplf() { zklfa postgres-operator "${@}" }
+function zkpguil() { zkla postgres-operator-ui "${@}" }
+function zkpguilf() { zklfa postgres-operator-ui "${@}" }
 
 alias zkspilos='zkgp --selector=''application=spilo'''
 alias zkspilosj='zkgpj --selector=''application=spilo'''
 alias zkspilosy='zkgpy --selector=''application=spilo'''
 alias zkspilosn='zkgpn --selector=''application=spilo'''
-alias zkss='zkspilos'
-alias zkssj='zkspilosj'
-alias zkssy='zkspilosy'
-alias zkssn='zkspilosn'
+function zkss() { zkspilos "${@}" }
+function zkssj() { zkspilosj "${@}" }
+function zkssy() { zkspilosy "${@}" }
+function zkssn() { zkspilosn "${@}" }
 
 alias zkspilosprimary='zkgp --selector=''application=spilo,spilo-role=master'''
 alias zkspilosprimaryj='zkgpj --selector=''application=spilo,spilo-role=master'''
 alias zkspilosprimaryy='zkgpy --selector=''application=spilo,spilo-role=master'''
 alias zkspilosprimaryn='zkgpn --selector=''application=spilo,spilo-role=master'''
-alias zkssp='zkspilosprimary'
-alias zksspj='zkspilosprimaryj'
-alias zksspy='zkspilosprimaryy'
-alias zksspn='zkspilosprimaryn'
+function zkssp() { zkspilosprimary "${@}" }
+function zksspj() { zkspilosprimaryj "${@}" }
+function zksspy() { zkspilosprimaryy "${@}" }
+function zksspn() { zkspilosprimaryn "${@}" }
 
 alias zkspilosreplica='zkgp --selector=''application=spilo,spilo-role=replica'''
-alias zkssr='zkspilosreplica'
-alias zksspn='zkssp --output=name'
-alias zkssrn='zkssr --output=name'
-alias zkssop='zksspn'
-alias zkssor='zkssrn'
+function zkssr() { zkspilosreplica "${@}" }
+function zksspn() { zkssp --output=name "${@}" }
+function zkssrn() { zkssr --output=name "${@}" }
+function zkssop() { zksspn "${@}" }
+function zkssor() { zkssrn "${@}" }
 
 function zkspilo() {
   pg_cluster_name="${1}"
@@ -954,6 +1117,7 @@ function zkspilo() {
     zkgp --selector="application=spilo,version=${pg_cluster_name}" "${@}"
   else
     echo "usage: ${0} cluster_name" >&2
+    return 1
   fi
 }
 function zkspiloj() {
@@ -963,6 +1127,7 @@ function zkspiloj() {
     zkgpj --selector="application=spilo,version=${pg_cluster_name}" "${@}"
   else
     echo "usage: ${0} cluster_name" >&2
+    return 1
   fi
 }
 function zkspiloy() {
@@ -972,6 +1137,7 @@ function zkspiloy() {
     zkgpy --selector="application=spilo,version=${pg_cluster_name}" "${@}"
   else
     echo "usage: ${0} cluster_name" >&2
+    return 1
   fi
 }
 function zkspilon() {
@@ -981,12 +1147,13 @@ function zkspilon() {
     zkgpn --selector="application=spilo,version=${pg_cluster_name}" "${@}"
   else
     echo "usage: ${0} cluster_name" >&2
+    return 1
   fi
 }
-alias zks='zkspilo'
-alias zksj='zkspiloj'
-alias zksy='zkspiloy'
-alias zksn='zkspilon'
+function zks() { zkspilo "${@}" }
+function zksj() { zkspiloj "${@}" }
+function zksy() { zkspiloy "${@}" }
+function zksn() { zkspilon "${@}" }
 
 function zkspiloprimary() {
   pg_cluster_name="${1}"
@@ -995,6 +1162,7 @@ function zkspiloprimary() {
     zkgp "${@}" --selector="application=spilo,version=${pg_cluster_name},spilo-role=master"
   else
     echo "usage: ${0} cluster_name" >&2
+    return 1
   fi
 }
 function zkspiloprimaryj() {
@@ -1004,6 +1172,7 @@ function zkspiloprimaryj() {
     zkgpj "${@}" --selector="application=spilo,version=${pg_cluster_name},spilo-role=master"
   else
     echo "usage: ${0} cluster_name" >&2
+    return 1
   fi
 }
 function zkspiloprimaryy() {
@@ -1013,6 +1182,7 @@ function zkspiloprimaryy() {
     zkgpy "${@}" --selector="application=spilo,version=${pg_cluster_name},spilo-role=master"
   else
     echo "usage: ${0} cluster_name" >&2
+    return 1
   fi
 }
 function zkspiloprimaryn() {
@@ -1022,12 +1192,13 @@ function zkspiloprimaryn() {
     zkgpn "${@}" --selector="application=spilo,version=${pg_cluster_name},spilo-role=master"
   else
     echo "usage: ${0} cluster_name" >&2
+    return 1
   fi
 }
-alias zksp='zkspiloprimary'
-alias zkspj='zkspiloprimaryj'
-alias zkspy='zkspiloprimaryy'
-alias zkspn='zkspiloprimaryn'
+function zksp() { zkspiloprimary "${@}" }
+function zkspj() { zkspiloprimaryj "${@}" }
+function zkspy() { zkspiloprimaryy "${@}" }
+function zkspn() { zkspiloprimaryn "${@}" }
 
 function zkspiloreplica() {
   pg_cluster_name="${1}"
@@ -1036,6 +1207,7 @@ function zkspiloreplica() {
     zkgp "${@}" --selector="application=spilo,version=${pg_cluster_name},spilo-role=replica"
   else
     echo "usage: ${0} cluster_name" >&2
+    return 1
   fi
 }
 function zkspiloreplicaj() {
@@ -1045,6 +1217,7 @@ function zkspiloreplicaj() {
     zkgpj "${@}" --selector="application=spilo,version=${pg_cluster_name},spilo-role=replica"
   else
     echo "usage: ${0} cluster_name" >&2
+    return 1
   fi
 }
 function zkspiloreplicay() {
@@ -1054,6 +1227,7 @@ function zkspiloreplicay() {
     zkgpy "${@}" --selector="application=spilo,version=${pg_cluster_name},spilo-role=replica"
   else
     echo "usage: ${0} cluster_name" >&2
+    return 1
   fi
 }
 function zkspiloreplican() {
@@ -1063,12 +1237,13 @@ function zkspiloreplican() {
     zkgpn "${@}" --selector="application=spilo,version=${pg_cluster_name},spilo-role=replica"
   else
     echo "usage: ${0} cluster_name" >&2
+    return 1
   fi
 }
-alias zksr='zkspiloreplica'
-alias zksrj='zkspiloreplicaj'
-alias zksry='zkspiloreplicay'
-alias zksrn='zkspiloreplican'
+function zksr() { zkspiloreplica "${@}" }
+function zksrj() { zkspiloreplicaj "${@}" }
+function zksry() { zkspiloreplicay "${@}" }
+function zksrn() { zkspiloreplican "${@}" }
 
 function zklspiloprimary() {
   pg_cluster_name="${1}"
@@ -1077,10 +1252,11 @@ function zklspiloprimary() {
     zkl "$(zkspn "${pg_cluster_name}")" "${@}"
   else
     echo "usage: ${0} cluster_name" >&2
+    return 1
   fi
 }
-alias zklsp='zklspiloprimary'
-alias zkspl='zklsp'
+function zklsp() { zklspiloprimary "${@}" }
+function zkspl() { zklsp "${@}" }
 
 function zkespiloprimary() {
   pg_cluster_name="${1}"
@@ -1089,22 +1265,23 @@ function zkespiloprimary() {
     zke "$(zkspn "${pg_cluster_name}")" "${@}"
   else
     echo "usage: ${0} cluster_name" >&2
+    return 1
   fi
 }
-alias zkesp='zkespiloprimary'
-alias zkspe='zkesp'
+function zkesp() { zkespiloprimary "${@}" }
+function zkspe() { zkesp "${@}" }
 
 function zkspiloprimarybash() {
   zkesp "${@}" -- bash
 }
-alias zkspb='zkspiloprimarybash'
-alias zkbsp='zkspb'
+function zkspb() { zkspiloprimarybash "${@}" }
+function zkbsp() { zkspb "${@}" }
 
 function zkspiloprimarypsql() {
   zkesp "${@}" -- sudo -i -u postgres -- psql
 }
-alias zkspq='zkspiloprimarypsql'
-alias zkqsp='zkspq'
+function zkspq() { zkspiloprimarypsql "${@}" }
+function zkqsp() { zkspq "${@}" }
 
 function zkspilopatronictl() {
   pg_cluster_name="${1}"
@@ -1114,9 +1291,10 @@ function zkspilopatronictl() {
     zke "$(zksn "${pg_cluster_name}" | lines | head -n 1)" -- sudo -i -u postgres -- patronictl "${patronictl_command}" "${pg_cluster_name}" "${@}"
   else
     echo "usage: ${0} cluster_name patronictl_command" >&2
+    return 1
   fi
 }
-alias zksc='zkspilopatronictl'
+function zksc() { zkspilopatronictl "${@}" }
 
 
 
