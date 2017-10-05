@@ -480,10 +480,10 @@ function ksha() { k_a ksh "${@}" }
 function kbl() { k_l kb "${@}" }
 function kba() { k_a kb "${@}" }
 
-function kpgopl() { kla postgres-operator "${@}" }
-function kpgoplf() { klfa postgres-operator "${@}" }
-function kpguil() { kla postgres-operator-ui "${@}" }
-function kpguilf() { klfa postgres-operator-ui "${@}" }
+function kpgopl() { kla 'postgres-operator' "${@}" }
+function kpgoplf() { klfa 'postgres-operator' "${@}" }
+function kpguil() { kla 'postgres-operator-ui' "${@}" }
+function kpguilf() { klfa 'postgres-operator-ui' "${@}" }
 
 alias kspilos='kgp --selector=''application=spilo'''
 alias kspilosj='kgpj --selector=''application=spilo'''
@@ -1059,32 +1059,58 @@ function zk_l() {
 
 function zk_a() {
   command="${1}"
-  application_name="${2}"
+  application="${2}"
   if shift && shift
   then
-    zk_l "${command}" "application=${application_name}" "${@}"
+    zk_l "${command}" "application=${application}" "${@}"
   else
-    echo "usage: ${0} command application_name" >&2
+    echo "usage: ${0} command application" >&2
+    return 1
+  fi
+}
+
+function zk_v() {
+  command="${1}"
+  version="${2}"
+  if shift && shift
+  then
+    zk_l "${command}" "version=${version}" "${@}"
+  else
+    echo "usage: ${0} command version" >&2
     return 1
   fi
 }
 
 function zkll() { zk_l zkl "${@}" }
 function zkla() { zk_a zkl "${@}" }
+function zklv() { zk_v zkl "${@}" }
 function zklfl() { zk_l zklf "${@}" }
 function zklfa() { zk_a zklf "${@}" }
+function zklfv() { zk_v zklf "${@}" }
 function zkel() { zk_l zke "${@}" }
 function zkea() { zk_a zke "${@}" }
+function zkev() { zk_v zke "${@}" }
 function zkshl() { zk_l zksh "${@}" }
 function zksha() { zk_a zksh "${@}" }
+function zkshv() { zk_v zksh "${@}" }
 function zkbl() { zk_l zkb "${@}" }
 function zkba() { zk_a zkb "${@}" }
+function zkbv() { zk_v zkb "${@}" }
 
-function zkpgopl() { zkla postgres-operator "${@}" }
-function zkpgoplf() { zklfa postgres-operator "${@}" }
-function zkpguil() { zkla postgres-operator-ui "${@}" }
-function zkpguilf() { zklfa postgres-operator-ui "${@}" }
+function zkpgopl() { zkla 'postgres-operator' "${@}" }
+function zkpgoplf() { zklfa 'postgres-operator' "${@}" }
+function zkpguil() { zkla 'postgres-operator-ui' "${@}" }
+function zkpguilf() { zklfa 'postgres-operator-ui' "${@}" }
 
+function zkgpg() { zkg postgresql "${@}" }
+function zkgpgj() { zkgj postgresql "${@}" }
+function zkgpgy() { zkgy postgresql "${@}" }
+function zkgpgn() { zkgn postgresql "${@}" }
+function zkgpgl() { zk_l zkgp "${@}" }
+
+function zkEpg() { zkE postgresql "${@}" }
+
+# TODO: make these use zkga 'spilo'; functions instead of aliases
 alias zkspilos='zkgp --selector=''application=spilo'''
 alias zkspilosj='zkgpj --selector=''application=spilo'''
 alias zkspilosy='zkgpy --selector=''application=spilo'''
@@ -1249,7 +1275,7 @@ function zklspiloprimary() {
   pg_cluster_name="${1}"
   if shift
   then
-    zkl "$(zkspn "${pg_cluster_name}")" "${@}"
+    zkl "$(zkspn "${pg_cluster_name}" | sed -e 's@^[^/]*/@@')" "${@}"
   else
     echo "usage: ${0} cluster_name" >&2
     return 1
@@ -1262,7 +1288,7 @@ function zkespiloprimary() {
   pg_cluster_name="${1}"
   if shift
   then
-    zke "$(zkspn "${pg_cluster_name}")" "${@}"
+    zke "$(zkspn "${pg_cluster_name}" | sed -e 's@^[^/]*/@@')" "${@}"
   else
     echo "usage: ${0} cluster_name" >&2
     return 1
@@ -1288,7 +1314,9 @@ function zkspilopatronictl() {
   patronictl_command="${2}"
   if shift && shift
   then
-    zke "$(zksn "${pg_cluster_name}" | lines | head -n 1)" -- sudo -i -u postgres -- patronictl "${patronictl_command}" "${pg_cluster_name}" "${@}"
+    zke "$(zksn "${pg_cluster_name}" | head -n 1 | sed -e 's@^[^/]*/@@')" -- \
+      sudo -i -u 'postgres' -- \
+        patronictl "${patronictl_command}" "${pg_cluster_name}" "${@}"
   else
     echo "usage: ${0} cluster_name patronictl_command" >&2
     return 1
