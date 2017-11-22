@@ -164,6 +164,23 @@ prompt_history() {
   prompt_segment 017 yellow '!'
 }
 
+prompt_kubecontext() {
+  context="$(kubectl config current-context)"
+  name="$(sed -e 's/^[^_]*_\([^_][^_]*\)_.*/\1/' <<< "${context}")"
+  if [[ "${name}" == "minikube" ]]
+  then
+    prompt_segment cyan black "${name}"
+  elif [[ "${name}" == "playground" ]]
+  then
+    prompt_segment green black "${name}"
+  elif [[ "${name}" == *"-test" ]]
+  then
+    prompt_segment yellow black "${name}"
+  else
+    prompt_segment red yellow "${name:-context}"
+  fi
+}
+
 ## Main prompt
 build_prompt() {
   typeset -g RETVAL=$?
@@ -174,6 +191,7 @@ build_prompt() {
   prompt_context
   prompt_dir
   prompt_git
+  prompt_kubecontext
 # prompt_hg
   prompt_end
 }

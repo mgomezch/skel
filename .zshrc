@@ -283,6 +283,8 @@ zstyle :compinstall filename "${HOME}/.zshrc"
 autoload -Uz compinit
 compinit
 
+command -v zkubectl > /dev/null && source <(zkubectl completion zsh)
+
 
 
 # History searching with PageUp/Down
@@ -386,15 +388,12 @@ export NVM_DIR="$HOME/.nvm"
 
 alias sqitch-surveys='docker run -it -v ~/.sqitch:/root/.sqitch -v "$PWD:/src" --rm matteofigus/docker-sqitch sqitch'
 
-alias pst='pstree -pUSlaughs'
-
-alias psxe='ps -eFlyww'
-
-alias psx='ps -Flyww'
-
-alias nstl='sudo netstat -tnlp'
-
-alias lines="tr ' ' '\n'"
+function pst() { pstree -pUSlaughs }
+function psxe() { ps -eFlyww }
+function psx() { ps -Flyww }
+function nstl() { sudo netstat -tnlp }
+function lines() { tr ' ' '\n' }
+function myip() { dig TXT +short 'o-o.myaddr.l.google.com' @'ns1.google.com' | tr -d '"' }
 
 
 
@@ -999,28 +998,34 @@ function mksc() { mkspilopatronictl "${@}" }
 
 
 
+# zkubectl
+
 function zk() { zkubectl "${@}" }
 
-function zkg() { zk get --show-all --output=wide --show-labels "${@}" }
-function zkgj() { zkg --output=json "${@}" }
-function zkgy() { zkg --output=yaml "${@}" }
-function zkgn() { zkg --output=name "${@}" }
+function zkg() { zk get --show-all --output='wide' --show-labels "${@}" }
+function zkgj() { zkg --output='json' "${@}" }
+function zkgy() { zkg --output='yaml' "${@}" }
+function zkgn() { zkg --output='name' "${@}" }
 
 function zkgp() { zkg pods "${@}" }
 function zkgpj() { zkgj pods "${@}" }
 function zkgpy() { zkgy pods "${@}" }
 function zkgpn() { zkgn pods "${@}" }
 
-function zkga() { zkg all "${@}" }
-function zkgaj() { zkgj all "${@}" }
-function zkgay() { zkgy all "${@}" }
-function zkgan() { zkgn all "${@}" }
+function zkgA() { zkg all "${@}" }
+function zkgAj() { zkgj all "${@}" }
+function zkgAy() { zkgy all "${@}" }
+function zkgAn() { zkgn all "${@}" }
 
 function zkd() { zk describe "${@}" }
-function zkD() { zk delete "${@}" }
-function zkE() { zk edit "${@}" }
+function zkdp() { zkd pods "${@}" }
+
+function zkA() { zk apply "${@}" }
+function zkAf() { zka -f "${@}" }
 function zkC() { zk create "${@}" }
 function zkCf() { zkc -f "${@}" }
+function zkD() { zk delete "${@}" }
+function zkE() { zk edit "${@}" }
 
 function zkl() { zk logs "${@}" }
 function zklf() { zkl --follow "${@}" }
@@ -1050,7 +1055,7 @@ function zk_l() {
   selector="${2}"
   if shift && shift
   then
-    "${command}" "$(zkgpn -l "${selector}" | sed -e 's@pods/@@' | head -n 1)" "${@}"
+    "${command}" -l "${selector}" "${@}"
   else
     echo "usage: ${0} command selector" >&2
     return 1
@@ -1081,66 +1086,173 @@ function zk_v() {
   fi
 }
 
-function zkll() { zk_l zkl "${@}" }
-function zkla() { zk_a zkl "${@}" }
-function zklv() { zk_v zkl "${@}" }
-function zklfl() { zk_l zklf "${@}" }
-function zklfa() { zk_a zklf "${@}" }
-function zklfv() { zk_v zklf "${@}" }
-function zkel() { zk_l zke "${@}" }
-function zkea() { zk_a zke "${@}" }
-function zkev() { zk_v zke "${@}" }
-function zkshl() { zk_l zksh "${@}" }
-function zksha() { zk_a zksh "${@}" }
-function zkshv() { zk_v zksh "${@}" }
-function zkbl() { zk_l zkb "${@}" }
-function zkba() { zk_a zkb "${@}" }
-function zkbv() { zk_v zkb "${@}" }
+# describe pods matching label, application or version:
+function zkdPl() { zk_l zkdp "${@}" }
+function zkdPa() { zk_l zkdp "${@}" }
+function zkdPv() { zk_l zkdp "${@}" }
 
+# get pods matching label, application or version:
+function zkgpl() { zk_l zkgp "${@}" }
+function zkgpa() { zk_a zkgp "${@}" }
+function zkgpv() { zk_v zkgp "${@}" }
+function zkgplj() { zk_l zkgpj "${@}" }
+function zkgpaj() { zk_a zkgpj "${@}" }
+function zkgpvj() { zk_v zkgpj "${@}" }
+function zkgply() { zk_l zkgpy "${@}" }
+function zkgpay() { zk_a zkgpy "${@}" }
+function zkgpvy() { zk_v zkgpy "${@}" }
+function zkgpln() { zk_l zkgpn "${@}" }
+function zkgpan() { zk_a zkgpn "${@}" }
+function zkgpvn() { zk_v zkgpn "${@}" }
+
+# get all matching label, application or version:
+function zkgAl() { zk_l zkgA "${@}" }
+function zkgAa() { zk_a zkgA "${@}" }
+function zkgAv() { zk_v zkgA "${@}" }
+function zkgAlj() { zk_l zkgAj "${@}" }
+function zkgAaj() { zk_a zkgAj "${@}" }
+function zkgAvj() { zk_v zkgAj "${@}" }
+function zkgAly() { zk_l zkgAy "${@}" }
+function zkgAay() { zk_a zkgAy "${@}" }
+function zkgAvy() { zk_v zkgAy "${@}" }
+function zkgAln() { zk_l zkgAn "${@}" }
+function zkgAan() { zk_a zkgAn "${@}" }
+function zkgAvn() { zk_v zkgAn "${@}" }
+
+# Run command on the first matching pod given a label selector:
+function zk1l() {
+  command="${1}"
+  selector="${2}"
+  if shift && shift
+  then
+    "${command}" "$(zkgpn -l "${selector}" | sed -e 's@pods/@@' | head -n 1)" "${@}"
+  else
+    echo "usage: ${0} command selector" >&2
+    return 1
+  fi
+}
+
+# Run command on the first matching pod given the application label:
+function zk1a() {
+  command="${1}"
+  application="${2}"
+  if shift && shift
+  then
+    zk1l "${command}" "application=${application}" "${@}"
+  else
+    echo "usage: ${0} command application" >&2
+    return 1
+  fi
+}
+
+# Run command on the first matching pod given the version label:
+function zk1v() {
+  command="${1}"
+  version="${2}"
+  if shift && shift
+  then
+    zk1l "${command}" "version=${version}" "${@}"
+  else
+    echo "usage: ${0} command version" >&2
+    return 1
+  fi
+}
+
+# describe selected pod by label, application or version:
+function zkdpl() { zk1l zkd "${@}" }
+function zkdpa() { zk1a zkd "${@}" }
+function zkdpv() { zk1v zkd "${@}" }
+
+# log on selected pod by label, application or version:
+function zkll() { zk1l zkl "${@}" }
+function zkla() { zk1a zkl "${@}" }
+function zklv() { zk1v zkl "${@}" }
+
+# log --follow on selected pod by label, application or version:
+function zklfl() { zk1l zklf "${@}" }
+function zklfa() { zk1a zklf "${@}" }
+function zklfv() { zk1v zklf "${@}" }
+
+# exec on selected pod by label, application or version:
+function zkel() { zk1l zke "${@}" }
+function zkea() { zk1a zke "${@}" }
+function zkev() { zk1v zke "${@}" }
+
+# exec /bin/sh on selected pod by label, application or version:
+function zkshl() { zk1l zksh "${@}" }
+function zksha() { zk1a zksh "${@}" }
+function zkshv() { zk1v zksh "${@}" }
+
+# exec bash on selected pod by label, application or version:
+function zkbl() { zk1l zkb "${@}" }
+function zkba() { zk1a zkb "${@}" }
+function zkbv() { zk1v zkb "${@}" }
+
+# describe on pod for PostgreSQL Operator:
+function zkpgopd() { zkda 'postgres-operator' "${@}" }
+function zkdpgop() { zkpgopd "${@}" }
+
+# describe on pod for PostgreSQL Operator UI:
+function zkpguid() { zkda 'postgres-operator-ui' "${@}" }
+function zkdpgui() { zkpguid "${@}" }
+
+# log and log --follow on pod for PostgreSQL Operator:
 function zkpgopl() { zkla 'postgres-operator' "${@}" }
 function zkpgoplf() { zklfa 'postgres-operator' "${@}" }
+
+# log and log --follow on pod for PostgreSQL Operator UI:
 function zkpguil() { zkla 'postgres-operator-ui' "${@}" }
 function zkpguilf() { zklfa 'postgres-operator-ui' "${@}" }
 
+# get PostgreSQL custom resource instance:
 function zkgpg() { zkg postgresql "${@}" }
 function zkgpgj() { zkgj postgresql "${@}" }
 function zkgpgy() { zkgy postgresql "${@}" }
 function zkgpgn() { zkgn postgresql "${@}" }
-function zkgpgl() { zk_l zkgp "${@}" }
 
+# describe PostgreSQL custom resource instance:
+function zkdpg() { zkd postgresql "${@}" }
+
+# delete or edit PostgreSQL custom resource instance:
+function zkDpg() { zkD postgresql "${@}" }
 function zkEpg() { zkE postgresql "${@}" }
 
-# TODO: make these use zkga 'spilo'; functions instead of aliases
-alias zkspilos='zkgp --selector=''application=spilo'''
-alias zkspilosj='zkgpj --selector=''application=spilo'''
-alias zkspilosy='zkgpy --selector=''application=spilo'''
-alias zkspilosn='zkgpn --selector=''application=spilo'''
+# get all Spilo pods:
+function zkspilos() { zkgpa 'spilo' "${@}" }
+function zkspilosj() { zkgpaj 'spilo' "${@}" }
+function zkspilosy() { zkgpay 'spilo' "${@}" }
+function zkspilosn() { zkgpan 'spilo' "${@}" }
 function zkss() { zkspilos "${@}" }
 function zkssj() { zkspilosj "${@}" }
 function zkssy() { zkspilosy "${@}" }
 function zkssn() { zkspilosn "${@}" }
 
-alias zkspilosprimary='zkgp --selector=''application=spilo,spilo-role=master'''
-alias zkspilosprimaryj='zkgpj --selector=''application=spilo,spilo-role=master'''
-alias zkspilosprimaryy='zkgpy --selector=''application=spilo,spilo-role=master'''
-alias zkspilosprimaryn='zkgpn --selector=''application=spilo,spilo-role=master'''
+# get all Spilo primary pods:
+function zkspilosprimary() { zkgpl 'application=spilo,spilo-role=master' "${@}" }
+function zkspilosprimaryj() { zkgplj 'application=spilo,spilo-role=master' "${@}" }
+function zkspilosprimaryy() { zkgply 'application=spilo,spilo-role=master' "${@}" }
+function zkspilosprimaryn() { zkgpln 'application=spilo,spilo-role=master' "${@}" }
 function zkssp() { zkspilosprimary "${@}" }
 function zksspj() { zkspilosprimaryj "${@}" }
 function zksspy() { zkspilosprimaryy "${@}" }
 function zksspn() { zkspilosprimaryn "${@}" }
 
-alias zkspilosreplica='zkgp --selector=''application=spilo,spilo-role=replica'''
+# get all Spilo replica pods:
+function zkspilosreplica() { zkgpl 'application=spilo,spilo-role=replica' "${@}" }
+function zkspilosreplicaj() { zkgplj 'application=spilo,spilo-role=replica' "${@}" }
+function zkspilosreplicay() { zkgply 'application=spilo,spilo-role=replica' "${@}" }
+function zkspilosreplican() { zkgpln 'application=spilo,spilo-role=replica' "${@}" }
 function zkssr() { zkspilosreplica "${@}" }
-function zksspn() { zkssp --output=name "${@}" }
-function zkssrn() { zkssr --output=name "${@}" }
-function zkssop() { zksspn "${@}" }
-function zkssor() { zkssrn "${@}" }
+function zkssrj() { zkspilosreplicaj "${@}" }
+function zkssry() { zkspilosreplicay "${@}" }
+function zkssrn() { zkspilosreplican "${@}" }
 
+# get pods for Spilo by PostgreSQL cluster name:
 function zkspilo() {
   pg_cluster_name="${1}"
   if shift
   then
-    zkgp --selector="application=spilo,version=${pg_cluster_name}" "${@}"
+    zkgpl "application=spilo,version=${pg_cluster_name}" "${@}"
   else
     echo "usage: ${0} cluster_name" >&2
     return 1
@@ -1150,7 +1262,7 @@ function zkspiloj() {
   pg_cluster_name="${1}"
   if shift
   then
-    zkgpj --selector="application=spilo,version=${pg_cluster_name}" "${@}"
+    zkgplj "application=spilo,version=${pg_cluster_name}" "${@}"
   else
     echo "usage: ${0} cluster_name" >&2
     return 1
@@ -1160,7 +1272,7 @@ function zkspiloy() {
   pg_cluster_name="${1}"
   if shift
   then
-    zkgpy --selector="application=spilo,version=${pg_cluster_name}" "${@}"
+    zkgply "application=spilo,version=${pg_cluster_name}" "${@}"
   else
     echo "usage: ${0} cluster_name" >&2
     return 1
@@ -1170,7 +1282,7 @@ function zkspilon() {
   pg_cluster_name="${1}"
   if shift
   then
-    zkgpn --selector="application=spilo,version=${pg_cluster_name}" "${@}"
+    zkgpln "application=spilo,version=${pg_cluster_name}" "${@}"
   else
     echo "usage: ${0} cluster_name" >&2
     return 1
@@ -1181,11 +1293,12 @@ function zksj() { zkspiloj "${@}" }
 function zksy() { zkspiloy "${@}" }
 function zksn() { zkspilon "${@}" }
 
+# get pods for Spilo primary by PostgreSQL cluster name (assuming the spilo-role label is correct):
 function zkspiloprimary() {
   pg_cluster_name="${1}"
   if shift
   then
-    zkgp "${@}" --selector="application=spilo,version=${pg_cluster_name},spilo-role=master"
+    zkgpl "application=spilo,version=${pg_cluster_name},spilo-role=master" "${@}"
   else
     echo "usage: ${0} cluster_name" >&2
     return 1
@@ -1195,7 +1308,7 @@ function zkspiloprimaryj() {
   pg_cluster_name="${1}"
   if shift
   then
-    zkgpj "${@}" --selector="application=spilo,version=${pg_cluster_name},spilo-role=master"
+    zkgplj "application=spilo,version=${pg_cluster_name},spilo-role=master" "${@}"
   else
     echo "usage: ${0} cluster_name" >&2
     return 1
@@ -1205,7 +1318,7 @@ function zkspiloprimaryy() {
   pg_cluster_name="${1}"
   if shift
   then
-    zkgpy "${@}" --selector="application=spilo,version=${pg_cluster_name},spilo-role=master"
+    zkgply "application=spilo,version=${pg_cluster_name},spilo-role=master" "${@}"
   else
     echo "usage: ${0} cluster_name" >&2
     return 1
@@ -1215,7 +1328,7 @@ function zkspiloprimaryn() {
   pg_cluster_name="${1}"
   if shift
   then
-    zkgpn "${@}" --selector="application=spilo,version=${pg_cluster_name},spilo-role=master"
+    zkgpln "application=spilo,version=${pg_cluster_name},spilo-role=master" "${@}"
   else
     echo "usage: ${0} cluster_name" >&2
     return 1
@@ -1226,11 +1339,12 @@ function zkspj() { zkspiloprimaryj "${@}" }
 function zkspy() { zkspiloprimaryy "${@}" }
 function zkspn() { zkspiloprimaryn "${@}" }
 
+# get pods for Spilo replicas by PostgreSQL cluster name:
 function zkspiloreplica() {
   pg_cluster_name="${1}"
   if shift
   then
-    zkgp "${@}" --selector="application=spilo,version=${pg_cluster_name},spilo-role=replica"
+    zkgpl "application=spilo,version=${pg_cluster_name},spilo-role=replica" "${@}"
   else
     echo "usage: ${0} cluster_name" >&2
     return 1
@@ -1240,7 +1354,7 @@ function zkspiloreplicaj() {
   pg_cluster_name="${1}"
   if shift
   then
-    zkgpj "${@}" --selector="application=spilo,version=${pg_cluster_name},spilo-role=replica"
+    zkgplj "application=spilo,version=${pg_cluster_name},spilo-role=replica" "${@}"
   else
     echo "usage: ${0} cluster_name" >&2
     return 1
@@ -1250,7 +1364,7 @@ function zkspiloreplicay() {
   pg_cluster_name="${1}"
   if shift
   then
-    zkgpy "${@}" --selector="application=spilo,version=${pg_cluster_name},spilo-role=replica"
+    zkgply "application=spilo,version=${pg_cluster_name},spilo-role=replica" "${@}"
   else
     echo "usage: ${0} cluster_name" >&2
     return 1
@@ -1260,7 +1374,7 @@ function zkspiloreplican() {
   pg_cluster_name="${1}"
   if shift
   then
-    zkgpn "${@}" --selector="application=spilo,version=${pg_cluster_name},spilo-role=replica"
+    zkgpln "application=spilo,version=${pg_cluster_name},spilo-role=replica" "${@}"
   else
     echo "usage: ${0} cluster_name" >&2
     return 1
@@ -1271,6 +1385,23 @@ function zksrj() { zkspiloreplicaj "${@}" }
 function zksry() { zkspiloreplicay "${@}" }
 function zksrn() { zkspiloreplican "${@}" }
 
+# log --follow for primary Spilo pod by PostgreSQL cluster name:
+function zklspiloprimary() {
+  pg_cluster_name="${1}"
+  if shift
+  then
+    zklf "$(zkspn "${pg_cluster_name}" | sed -e 's@^[^/]*/@@')" "${@}"
+  else
+    echo "usage: ${0} cluster_name" >&2
+    return 1
+  fi
+}
+function zklfsp() { zklfspiloprimary "${@}" }
+function zksplf() { zklfsp "${@}" }
+function zklfs() { zklfsp "${@}" }
+function zkslf() { zksplf "${@}" }
+
+# log for primary Spilo pod by PostgreSQL cluster name:
 function zklspiloprimary() {
   pg_cluster_name="${1}"
   if shift
@@ -1283,7 +1414,10 @@ function zklspiloprimary() {
 }
 function zklsp() { zklspiloprimary "${@}" }
 function zkspl() { zklsp "${@}" }
+function zkls() { zklsp "${@}" }
+function zksl() { zkspl "${@}" }
 
+# exec on primary Spilo pod by PostgreSQL cluster name:
 function zkespiloprimary() {
   pg_cluster_name="${1}"
   if shift
@@ -1297,18 +1431,21 @@ function zkespiloprimary() {
 function zkesp() { zkespiloprimary "${@}" }
 function zkspe() { zkesp "${@}" }
 
+# exec Bash on primary Spilo pod by PostgreSQL cluster name:
 function zkspiloprimarybash() {
   zkesp "${@}" -- bash
 }
 function zkspb() { zkspiloprimarybash "${@}" }
 function zkbsp() { zkspb "${@}" }
 
+# exec psql on primary Spilo pod by PostgreSQL cluster name:
 function zkspiloprimarypsql() {
   zkesp "${@}" -- sudo -i -u postgres -- psql
 }
 function zkspq() { zkspiloprimarypsql "${@}" }
 function zkqsp() { zkspq "${@}" }
 
+# Run a patronictl command on a Spilo pod by PostgreSQL cluster name:
 function zkspilopatronictl() {
   pg_cluster_name="${1}"
   patronictl_command="${2}"
@@ -1323,6 +1460,60 @@ function zkspilopatronictl() {
   fi
 }
 function zksc() { zkspilopatronictl "${@}" }
+
+# diff outputs of the given command given the first vs. the second matched pod
+# name as arguments.  e.g. "zk_diff some_command zkgpan bar" diffs the outputs
+# of "foo pod_1" and "foo pod_2" where pod_1 and pod_2 are the output lines of
+# "zkgpan bar" (which must be a whitespace- or line-separated list of pod names)
+function zk_diff() {
+  # Note: command gets wordsplit
+  command="${1}"
+  if shift
+  then
+    pods=($("${@}"))
+    vimdiff <(${command} "${pods[1]}") <(${command} "${pods[2]}")
+  else
+    echo "usage: ${0} command selector" >&2
+    return 1
+  fi
+}
+
+# diff pod YAML manifests:
+function zkgpydiff() {
+  zk_diff zkgpy "${@}"
+}
+
+# diff pod descriptions:
+function zkdpdiff() {
+  zk_diff zkd "${@}"
+}
+
+# diff pod descriptions given a label selector:
+function zkdpdiffl() {
+  zkdpdiff zkgpln "${@}"
+}
+
+# diff pod descriptions given the application label:
+function zkdpdiffa() {
+  zkdpdiff zkgpan "${@}"
+}
+
+# diff pod descriptions given the version label:
+function zkdpdiffv() {
+  zkdpdiff zkgpvn "${@}"
+}
+
+
+
+function zurl() {
+  curl -H "Authorization: Bearer $(ztoken)" "${@}"
+}
+function zcurl() { zurl "${@}" }
+
+function zttp() {
+  http -A 'zign' -a 'https:' --default-scheme='https' "${@}"
+}
+function zhttp() { zttp "${@}" }
 
 
 
@@ -1423,9 +1614,6 @@ _my_generic () {
 bindkey '^X^a' all-matches
 
 
-# Fix ag, aliased to apt-get in the Ubuntu Oh My Zsh plugin:
-unalias ag
-
 eval $(thefuck --alias)
 
 
@@ -1433,5 +1621,5 @@ eval $(thefuck --alias)
 if [ -z "${ZSH_COWSAY_DONE+1}" ]
 then
   export ZSH_COWSAY_DONE=1
-  fortune | cowsay
+  fortune | cowsay -f elephant
 fi
