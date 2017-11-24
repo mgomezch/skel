@@ -180,7 +180,7 @@ prompt_kubecontext() {
     prompt_segment 35 black "${symbol}${name}"
   elif [[ "${name}" == *"-test" ]]
   then
-    prompt_segment cyan black "${symbol}${name}"
+    prompt_segment 17 yellow "${symbol}${name}"
   else
     prompt_segment red yellow "${symbol}${name:-context}"
   fi

@@ -1002,6 +1002,12 @@ function mksc() { mkspilopatronictl "${@}" }
 
 function zk() { zkubectl "${@}" }
 
+function zkL() { zk login "${@}" }
+
+# Commonly used clusters:
+function zp() { zkL 'playground' }
+function zdb() { zkL 'db' }
+
 function zkg() { zk get --show-all --output='wide' --show-labels "${@}" }
 function zkgj() { zkg --output='json' "${@}" }
 function zkgy() { zkg --output='yaml' "${@}" }
@@ -1431,6 +1437,13 @@ function zkespiloprimary() {
 function zkesp() { zkespiloprimary "${@}" }
 function zkspe() { zkesp "${@}" }
 
+# exec /bin/sh on primary Spilo pod by PostgreSQL cluster name:
+function zkspiloprimarysh() {
+  zkesp "${@}" -- sh
+}
+function zkspsh() { zkspiloprimarybash "${@}" }
+function zkshsp() { zkspb "${@}" }
+
 # exec Bash on primary Spilo pod by PostgreSQL cluster name:
 function zkspiloprimarybash() {
   zkesp "${@}" -- bash
@@ -1452,14 +1465,27 @@ function zkspilopatronictl() {
   if shift && shift
   then
     zke "$(zksn "${pg_cluster_name}" | head -n 1 | sed -e 's@^[^/]*/@@')" -- \
-      sudo -i -u 'postgres' -- \
-        patronictl "${patronictl_command}" "${pg_cluster_name}" "${@}"
+      su 'postgres' -c \
+        "patronictl ${patronictl_command} ${pg_cluster_name} ${*}"
   else
     echo "usage: ${0} cluster_name patronictl_command" >&2
     return 1
   fi
 }
 function zksc() { zkspilopatronictl "${@}" }
+
+# Run a patronictl command on a Spilo pod by PostgreSQL cluster name:
+function zkspilopatronictllist() {
+  pg_cluster_name="${1}"
+  if shift
+  then
+    zksc "${pg_cluster_name}" list "${@}"
+  else
+    echo "usage: ${0} cluster_name" >&2
+    return 1
+  fi
+}
+function zkscl() { zkspilopatronictllist "${@}" }
 
 # diff outputs of the given command given the first vs. the second matched pod
 # name as arguments.  e.g. "zk_diff some_command zkgpan bar" diffs the outputs
@@ -1562,6 +1588,10 @@ function work-expenses-plot() {
 }
 
 alias ag-zalando-hostname="ag -ui '([a-z]([a-z0-9]*|[a-z0-9-]*[a-z0-9]+)\.)+(pp|zalan\.do|zalando\.([a-z][a-z][a-z]?|co\.[a-z][a-z])|zalando)\b\.?(?=[^.a-z0-9]|$)'"
+
+function glff() {
+  gl --ff-only "${@}"
+}
 
 function ghclone() {
   (
