@@ -1165,9 +1165,9 @@ function zk1v() {
 }
 
 # describe selected pod by label, application or version:
-function zkdpl() { zk1l zkd "${@}" }
-function zkdpa() { zk1a zkd "${@}" }
-function zkdpv() { zk1v zkd "${@}" }
+function zkdpl() { zk1l zkdp "${@}" }
+function zkdpa() { zk1a zkdp "${@}" }
+function zkdpv() { zk1v zkdp "${@}" }
 
 # log on selected pod by label, application or version:
 function zkll() { zk1l zkl "${@}" }
@@ -1195,11 +1195,11 @@ function zkba() { zk1a zkb "${@}" }
 function zkbv() { zk1v zkb "${@}" }
 
 # describe on pod for PostgreSQL Operator:
-function zkpgopd() { zkda 'postgres-operator' "${@}" }
+function zkpgopd() { zkdpa 'postgres-operator' "${@}" }
 function zkdpgop() { zkpgopd "${@}" }
 
 # describe on pod for PostgreSQL Operator UI:
-function zkpguid() { zkda 'postgres-operator-ui' "${@}" }
+function zkpguid() { zkdpa 'postgres-operator-ui' "${@}" }
 function zkdpgui() { zkpguid "${@}" }
 
 # log and log --follow on pod for PostgreSQL Operator:
