@@ -1013,6 +1013,11 @@ function zkgj() { zkg --output='json' "${@}" }
 function zkgy() { zkg --output='yaml' "${@}" }
 function zkgn() { zkg --output='name' "${@}" }
 
+function zkgN() { zkg nodes "${@}" }
+function zkgNj() { zkgj nodes "${@}" }
+function zkgNy() { zkgy nodes "${@}" }
+function zkgNn() { zkgn nodes "${@}" }
+
 function zkgp() { zkg pods "${@}" }
 function zkgpj() { zkgj pods "${@}" }
 function zkgpy() { zkgy pods "${@}" }
