@@ -1002,6 +1002,25 @@ function mksc() { mkspilopatronictl "${@}" }
 
 function zk() { zkubectl "${@}" }
 
+function zclusters() {
+  zttp \
+    'cluster-registry.stups.zalan.do/kubernetes-clusters' \
+    | jq -r '
+      .items[]
+      | select(.alias != "")
+      | (
+        .alias
+        + " "
+        + (
+          .infrastructure_account
+          | sub("^aws:"; "")
+        )
+      )
+    ' \
+    | sort -u \
+    | column -t
+}
+function zcs() { zclusters "${@}" }
 function zkL() { zk login "${@}" }
 
 # Commonly used clusters:
@@ -1458,7 +1477,8 @@ function zkbsp() { zkspb "${@}" }
 
 # exec psql on primary Spilo pod by PostgreSQL cluster name:
 function zkspiloprimarypsql() {
-  zkesp "${@}" -- sudo -i -u postgres -- psql
+  zkesp "${@}" -- \
+    su 'postgres' -c 'psql'
 }
 function zkspq() { zkspiloprimarypsql "${@}" }
 function zkqsp() { zkspq "${@}" }
