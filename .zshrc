@@ -1021,6 +1021,42 @@ function zclusters() {
     | column -t
 }
 function zcs() { zclusters "${@}" }
+
+function zclustersroles() {
+  join \
+    -o '0 1.2' \
+    -t '|' \
+    -j 1 \
+    <(
+      zttp 'cluster-registry.stups.zalan.do/infrastructure-accounts' \
+        | jq -r \
+          '
+            .items[]
+            | select(
+              .owner
+              | match("^community/")
+            )
+            | (
+              .name
+              + "|" + .owner
+            )
+          ' \
+        | sort
+    ) \
+    <(
+      zttp 'cluster-registry.stups.zalan.do/kubernetes-clusters' \
+        | jq -r \
+          '
+            .items[]
+            .alias
+            | select(. != "")
+          ' \
+        | sort
+    ) \
+    | column -t -s '|'
+}
+function zcsrs() { zclustersroles "${@}" }
+
 function zkL() { zk login "${@}" }
 
 # Commonly used clusters:
