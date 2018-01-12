@@ -307,15 +307,12 @@ man_new_paths=(); function man_add_path() { [[ -d $1 ]] && man_new_paths+=($1); 
 bin_add_path "${HOME}/.rvm/bin"
 bin_add_path "${HOME}/.pyenv/bin"
 bin_add_path "${HOME}/.cargo/bin"
-bin_add_path "${HOME}/.rakudobrew/moar-nom/install/share/perl6/site/bin"
 bin_add_path "${HOME}/bin"
 bin_add_path "${HOME}/stuff/bin"
 bin_add_path "${HOME}/stuff/commands"
 bin_add_path "${HOME}/.cabal/bin"
 bin_add_path "${HOME}/.opt/github/hub/bin"
-bin_add_path "${HOME}/.opt/texlive/2013/bin/i386-linux"
-bin_add_path "${HOME}/.opt/TogglDesktop"
-bin_add_path "${HOME}/perl5/perlbrew/bin"
+bin_add_path "${HOME}/stuff/code/repo/github.bus.zalan.do/acid/db-utils"
 
 # Library paths
 #lib_add_path "${HOME}/.opt/gcc/lib64"
@@ -1151,6 +1148,11 @@ function zk_v() {
     return 1
   fi
 }
+
+# describe resource matching label, application or version:
+function zkdl() { zk_l zkd "${@}" }
+function zkda() { zk_a zkd "${@}" }
+function zkdv() { zk_v zkd "${@}" }
 
 # describe pods matching label, application or version:
 function zkdPl() { zk_l zkdp "${@}" }
