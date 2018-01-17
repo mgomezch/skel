@@ -340,7 +340,7 @@ export         MANPATH="$(IFS=':'; printf '%s' "${man_new_paths[*]}"):${MANPATH}
 [[ ${TERM} == xterm ]] && export TERM='xterm-256color'
 export LANG='en_US.UTF-8'
 export LC_ALL='en_US.UTF-8'
-export PAGER='less -S'
+export PAGER='most'
 export LESS='-r'
 export EDITOR='vim'
 export BC_LINE_LENGTH=0
@@ -1020,36 +1020,38 @@ function zclusters() {
 function zcs() { zclusters "${@}" }
 
 function zclustersroles() {
+  accounts="$(
+    zttp 'cluster-registry.stups.zalan.do/infrastructure-accounts' \
+      | jq -r \
+        '
+          .items[]
+          | select(
+            .owner
+            | match("^community/")
+          )
+          | (
+            .name
+            + "|" + .owner
+          )
+        ' \
+      | sort
+  )"
+  clusters="$(
+    zttp 'cluster-registry.stups.zalan.do/kubernetes-clusters' \
+      | jq -r \
+        '
+          .items[]
+          .alias
+          | select(. != "")
+        ' \
+      | sort
+  )"
   join \
     -o '0 1.2' \
     -t '|' \
     -j 1 \
-    <(
-      zttp 'cluster-registry.stups.zalan.do/infrastructure-accounts' \
-        | jq -r \
-          '
-            .items[]
-            | select(
-              .owner
-              | match("^community/")
-            )
-            | (
-              .name
-              + "|" + .owner
-            )
-          ' \
-        | sort
-    ) \
-    <(
-      zttp 'cluster-registry.stups.zalan.do/kubernetes-clusters' \
-        | jq -r \
-          '
-            .items[]
-            .alias
-            | select(. != "")
-          ' \
-        | sort
-    ) \
+    <(<<<"${accounts}") \
+    <(<<<"${clusters}") \
     | column -t -s '|'
 }
 function zcsrs() { zclustersroles "${@}" }
