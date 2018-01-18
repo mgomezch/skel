@@ -1697,6 +1697,19 @@ function docker_pids() {
   | column -t
 }
 
+function zbetaprs {
+  http \
+    'https://api.github.com/search/issues?q=beta+repo:zalando-incubator/kubernetes-on-aws+type:pr+is:open+in:title' \
+    | jq -r '
+      .items[]
+      | (
+        .updated_at + " " +
+        .html_url + " " +
+        .title
+      )
+    '
+}
+
 
 
 zle -C all-matches complete-word _my_generic
