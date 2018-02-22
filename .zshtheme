@@ -165,24 +165,31 @@ prompt_history() {
 }
 
 prompt_kubecontext() {
-  symbol="⚙ "
+  symbol="⎈ "
   context="$(kubectl config current-context 2>/dev/null)"
   if [[ ! $? ]]
   then
     return
   fi
   name="$(sed -e 's/^[^_]*_\([^_][^_]*\)_.*/\1/' <<< "${context}")"
+  namespace="$(kubectl config view --minify --output 'jsonpath={..namespace}' 2>/dev/null)"
+  if [[ -n "${namespace}" && "${namespace}" != 'default' ]]
+  then
+    qname="${name}:${namespace}"
+  else
+    qname="${name}"
+  fi
   if [[ "${name}" == "minikube" ]]
   then
-    prompt_segment white black "${symbol}${name}"
+    prompt_segment white black "${symbol}${qname}"
   elif [[ "${name}" == "playground" ]]
   then
-    prompt_segment 35 black "${symbol}${name}"
+    prompt_segment 35 black "${symbol}${qname}"
   elif [[ "${name}" == *"-test" ]]
   then
-    prompt_segment 17 yellow "${symbol}${name}"
+    prompt_segment 17 yellow "${symbol}${qname}"
   else
-    prompt_segment red yellow "${symbol}${name:-context}"
+    prompt_segment red yellow "${symbol}${qname:-context}"
   fi
 }
 
