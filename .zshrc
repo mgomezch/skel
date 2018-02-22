@@ -1161,6 +1161,20 @@ function zkdPl() { zk_l zkdp "${@}" }
 function zkdPa() { zk_l zkdp "${@}" }
 function zkdPv() { zk_l zkdp "${@}" }
 
+# get resource matching label, application or version:
+function zkgl() { zk_l zkg "${@}" }
+function zkga() { zk_a zkg "${@}" }
+function zkgv() { zk_v zkg "${@}" }
+function zkglj() { zk_l zkgj "${@}" }
+function zkgaj() { zk_a zkgj "${@}" }
+function zkgvj() { zk_v zkgj "${@}" }
+function zkgly() { zk_l zkgy "${@}" }
+function zkgay() { zk_a zkgy "${@}" }
+function zkgvy() { zk_v zkgy "${@}" }
+function zkgln() { zk_l zkgn "${@}" }
+function zkgan() { zk_a zkgn "${@}" }
+function zkgvn() { zk_v zkgn "${@}" }
+
 # get pods matching label, application or version:
 function zkgpl() { zk_l zkgp "${@}" }
 function zkgpa() { zk_a zkgp "${@}" }
@@ -1456,7 +1470,7 @@ function zksry() { zkspiloreplicay "${@}" }
 function zksrn() { zkspiloreplican "${@}" }
 
 # log --follow for primary Spilo pod by PostgreSQL cluster name:
-function zklspiloprimary() {
+function zklfspiloprimary() {
   pg_cluster_name="${1}"
   if shift
   then
@@ -1697,7 +1711,7 @@ function docker_pids() {
   | column -t
 }
 
-function zbetaprs {
+function zbetaprs() {
   http \
     'https://api.github.com/search/issues?q=beta+repo:zalando-incubator/kubernetes-on-aws+type:pr+is:open+in:title' \
     | jq -r '
@@ -1708,6 +1722,14 @@ function zbetaprs {
         .title
       )
     '
+}
+
+function zia() {
+  zttp "cluster-registry.stups.zalan.do/infrastructure-accounts/aws:$1" \
+}
+
+function zias() {
+  zttp "cluster-registry.stups.zalan.do/infrastructure-accounts?owner=team/$1" \
 }
 
 
