@@ -437,7 +437,9 @@ function kbash() {
 function kb() { kbash "${@}" }
 
 function kpsql() {
-  ke "${@}" -- sudo -i -u postgres -- psql
+  ke "${@}" -- \
+    sudo -i -u 'postgres' -- \
+      psql
 }
 function kq() { kpsql "${@}" }
 
@@ -674,7 +676,9 @@ function kspb() { kspiloprimarybash "${@}" }
 function kbsp() { kspb "${@}" }
 
 function kspiloprimarypsql() {
-  kesp "${@}" -- sudo -i -u postgres -- psql
+  kesp "${@}" -- \
+    sudo -i -u 'postgres' -- \
+      psql
 }
 function kspq() { kspiloprimarypsql "${@}" }
 function kqsp() { kspq "${@}" }
@@ -684,7 +688,9 @@ function kspilopatronictl() {
   patronictl_command="${2}"
   if shift && shift
   then
-    ke "$(ksn "${pg_cluster_name}" | lines | head -n 1)" -- sudo -i -u postgres -- patronictl "${patronictl_command}" "${pg_cluster_name}" "${@}"
+    ke "$(ksn "${pg_cluster_name}" | lines | head -n 1)" --container='postgres' -- \
+      sudo -i -u 'postgres' -- \
+        patronictl "${patronictl_command}" "${pg_cluster_name}" "${@}"
   else
     echo "usage: ${0} cluster_name patronictl_command" >&2
     return 1
@@ -738,7 +744,7 @@ function mkbash() {
 function mkb() { mkbash "${@}" }
 
 function mkpsql() {
-  mke "${@}" -- sudo -i -u postgres -- psql
+  mke "${@}" -- sudo -i -u 'postgres' -- psql
 }
 function mkq() { mkpsql "${@}" }
 
@@ -975,7 +981,7 @@ function mkspb() { mkspiloprimarybash "${@}" }
 function mkbsp() { mkspb "${@}" }
 
 function mkspiloprimarypsql() {
-  mkesp "${@}" -- sudo -i -u postgres -- psql
+  mkesp "${@}" -- sudo -i -u 'postgres' -- psql
 }
 function mkspq() { mkspiloprimarypsql "${@}" }
 function mkqsp() { mkspq "${@}" }
@@ -985,7 +991,9 @@ function mkspilopatronictl() {
   patronictl_command="${2}"
   if shift && shift
   then
-    mke "$(mksn "${pg_cluster_name}" | lines | head -n 1)" -- sudo -i -u postgres -- patronictl "${patronictl_command}" "${pg_cluster_name}" "${@}"
+    mke "$(mksn "${pg_cluster_name}" | lines | head -n 1)" --container='postgres' -- \
+      sudo -i -u 'postgres' -- \
+        patronictl "${patronictl_command}" "${pg_cluster_name}" "${@}"
   else
     echo "usage: ${0} cluster_name patronictl_command" >&2
     return 1
@@ -1111,7 +1119,9 @@ function zkbash() {
 function zkb() { zkbash "${@}" }
 
 function zkpsql() {
-  zke "${@}" -- sudo -i -u postgres -- psql
+  zke "${@}" -- \
+    sudo -i -u 'postgres' -- \
+      psql
 }
 function zkq() { zkpsql "${@}" }
 
@@ -1543,7 +1553,7 @@ function zkspilopatronictl() {
   patronictl_command="${2}"
   if shift && shift
   then
-    zke "$(zksn "${pg_cluster_name}" | head -n 1 | sed -e 's@^[^/]*/@@')" -- \
+    zke "$(zksn "${pg_cluster_name}" | head -n 1 | sed -e 's@^[^/]*/@@')" --container='postgres' -- \
       su 'postgres' -c \
         "patronictl ${patronictl_command} ${pg_cluster_name} ${*}"
   else
@@ -1606,6 +1616,23 @@ function zkdpdiffa() {
 # diff pod descriptions given the version label:
 function zkdpdiffv() {
   zkdpdiff zkgpvn "${@}"
+}
+
+typeset -A _zalando_cluster_url_cache
+function zc() {
+  cluster="${1}"
+  command="${2}"
+  if shift && shift
+  then
+    if [[ "${+_zalando_cluster_url_cache[${cluster}]}" != 1 ]]
+    then
+      _zalando_cluster_url_cache+=( "${cluster}" "$(zttp "cluster-registry.stups.zalan.do/kubernetes-clusters?alias=${cluster}" | jq -r '.items[0].api_server_url')" )
+    fi
+    "${command}" --server="${(i)_zalando_cluster_url_cache[(k)${cluster}]}" "${@}"
+  else
+    echo "usage: ${0} command application" >&2
+    return 1
+  fi
 }
 
 
