@@ -1626,11 +1626,11 @@ function zc() {
   then
     if [[ "${+_zalando_cluster_url_cache[${cluster}]}" != 1 ]]
     then
-      _zalando_cluster_url_cache+=( "${cluster}" "$(zttp "cluster-registry.stups.zalan.do/kubernetes-clusters?alias=${cluster}" | jq -r '.items[0].api_server_url')" )
+      _zalando_cluster_url_cache+=( "${cluster}" "$(zttp "cluster-registry.stups.zalan.do/kubernetes-clusters?alias=${cluster}&lifecycle_status=ready" | jq -r '.items[0].api_server_url')" )
     fi
     "${command}" --server="${(i)_zalando_cluster_url_cache[(k)${cluster}]}" "${@}"
   else
-    echo "usage: ${0} command application" >&2
+    echo "usage: ${0} cluster_name command" >&2
     return 1
   fi
 }
