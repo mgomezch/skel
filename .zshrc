@@ -1635,6 +1635,10 @@ function zc() {
   fi
 }
 
+function zca() {
+  --server="$(zttp "cluster-registry.stups.zalan.do/kubernetes-clusters?alias=${cluster}&lifecycle_status=ready" | jq -r '.items[0].api_server_url')"
+}
+
 
 
 function zurl() {
