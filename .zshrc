@@ -1,4 +1,5 @@
 # Path to your oh-my-zsh configuration.
+
 ZSH="${HOME}/.oh-my-zsh"
 DEFAULT_USER='mgomezch'
 DISABLE_AUTO_TITLE='false'
@@ -6,8 +7,39 @@ COMPLETION_WAITING_DOTS='true'
 DISABLE_UNTRACKED_FILES_DIRTY='false' # This makes Git faster but it can’t notice untracked files well.
 HIST_STAMPS='yyyy-mm-dd'
 
+
+
+function source_if_exists() {
+  [[ -s "${1}" ]] && source "${1}"
+}
+
+source_if_exists "${HOME}/.nix-profile/etc/profile.d/nix.sh"
+
+export LOCALE_ARCHIVE="$(readlink ~/.nix-profile/lib/locale)/locale-archive"
+
+
+
+if [ -z "${ZSH_UPGRADE_RESTARTED+1}" ]
+then
+  autoload -U is-at-least
+  if ! is-at-least 5
+  then
+    export ZSH_UPGRADE_RESTARTED=1
+    exec zsh -$- "${@}"
+  fi
+fi
+
+
+
+if [[ -v BRAZIL_PLATFORM_OVERRIDE ]]
+then
+  devdesk=1
+fi
+
+
+
 plugins=(
-# aws
+  aws
   bower
   bundler
   cabal
@@ -49,7 +81,6 @@ plugins=(
   pyenv
   pylint
   python
-  rails
   ruby
   rust
   rvm
@@ -279,9 +310,17 @@ zstyle ':completion:*' menu select=1
 zstyle ':completion:*' original false
 zstyle ':completion:*' verbose true
 
+if [[ -v devdesk ]]
+then
+  fpath=(
+    "$(readlink -f /apollo/env/AWSBillAdjustmentsCLIUtils/autocomplete)"
+    "${fpath[@]}"
+  )
+fi
+
 zstyle :compinstall filename "${HOME}/.zshrc"
 autoload -Uz compinit
-compinit
+compinit -i
 
 command -v zkubectl > /dev/null && source <(zkubectl completion zsh)
 
@@ -312,19 +351,35 @@ bin_add_path "${HOME}/stuff/bin"
 bin_add_path "${HOME}/stuff/commands"
 bin_add_path "${HOME}/.cabal/bin"
 bin_add_path "${HOME}/.opt/github/hub/bin"
-bin_add_path "${HOME}/stuff/code/repo/github.bus.zalan.do/acid/db-utils"
+bin_add_path "${HOME}/.toolbox/bin"
+
+if [[ -v devdesk ]]
+then
+  for apollo_environment in \
+    SDETools \
+    AmazonAwsCli \
+    OdinTools \
+    AWSBillAdjustmentsCLIUtils \
+
+  do
+    if [[ -d "/apollo/env/${apollo_environment}" ]]
+    then
+      #bin_add_path "/apollo/env/${apollo_environment}/bin"
+    fi
+  done
+fi
 
 # Library paths
-#lib_add_path "${HOME}/.opt/gcc/lib64"
+#lib_add_path "${HOME}/.nix-profile/lib"
 
 # Include paths — shouldn’t this be handled by pkg-config?
-#inc_add_path "${HOME}/.opt/postgresql/9.2.4/include"
+#inc_add_path "${HOME}/.nix-profile/include"
 
 # GNU texinfo paths
-#inf_add_path "${HOME}/.opt/texlive/2013/texmf-dist/doc/info"
+inf_add_path "${HOME}/.nix-profile/share/info"
 
 # Manual paths
-#man_add_path "${HOME}/.opt/texlive/2013/texmf-dist/doc/man"
+man_add_path "${HOME}/.nix-profile/share/man"
 
 export            PATH="$(IFS=':'; printf '%s' "${bin_new_paths[*]}"):${PATH}"
 export LD_LIBRARY_PATH="$(IFS=':'; printf '%s' "${lib_new_paths[*]}"):${LD_LIBRARY_PATH}"
@@ -342,7 +397,7 @@ export LANG='en_US.UTF-8'
 export LC_ALL='en_US.UTF-8'
 export PAGER='most'
 export LESS='-r'
-export EDITOR='vim'
+export EDITOR='nvim'
 export BC_LINE_LENGTH=0
 
 
@@ -359,17 +414,13 @@ function v1p() {
 
 command -v pyenv &>/dev/null && {
   eval "$(pyenv init -)"
-  eval "$(pyenv virtualenv-init -)"
+# eval "$(pyenv virtualenv-init -)"
 }
 
 command -v thefuck &>/dev/null && eval "$(thefuck --alias)"
 
 [[ -x "$HOME/.rakudobrew/bin/rakudobrew" ]] && eval "$(~/.rakudobrew/bin/rakudobrew init -)"
 
-function source_if_exists() {
-  [[ -s "${1}" ]] && source "${1}"
-}
-source_if_exists "${HOME}/.nix-profile/etc/profile.d/nix.sh"
 source_if_exists "${HOME}/perl5/perlbrew/etc/bashrc"
 source_if_exists "${HOME}/.gvm/scripts/gvm"
 source_if_exists "${HOME}/.rvm/scripts/rvm"
@@ -384,6 +435,9 @@ export NVM_DIR="$HOME/.nvm"
 
 
 alias sqitch-surveys='docker run -it -v ~/.sqitch:/root/.sqitch -v "$PWD:/src" --rm matteofigus/docker-sqitch sqitch'
+
+alias ls='ls --color=auto'
+alias grep='grep --color=auto'
 
 function pst() { pstree -pUSlaughs }
 function psxe() { ps -eFlyww }
@@ -1682,19 +1736,19 @@ function loop_mklf() {
 }
 
 function work-hours() {
-  cat "${@:-${HOME}/work.yaml}" | yaml2json - | jq '((([.[] | ."Home time",."Office time" | .Ranges | .[]? | .Duration | strings | ((capture("(?<amount>[0-9]+)m") | .amount | tonumber), (capture("(?<amount>[0-9]+)h") | .amount | tonumber | . * 60))] | add) // 0) - (8 * 60 * ([.[] | .Day | values] | length))) / 60'
+  cat "${@:-${HOME}/work.yaml}" | yq -r '((([.[] | ."Home time",."Office time" | .[]? | .Duration | strings | ((capture("(?<amount>[0-9]+)m") | .amount | tonumber), (capture("(?<amount>[0-9]+)h") | .amount | tonumber | . * 60))] | add) // 0) - (8 * 60 * ([.[] | .Day | values] | length))) | ((. / 60 | floor | tostring) + "h" + (. % 60 | tostring) + "m")'
 }
 
 function work-expenses() {
-  cat "${@:-${HOME}/work.yaml}" | yaml2json - | jq '([ .. | .Amount? | strings | capture("(?<amount>[0-9]+)") | .amount | tonumber] | add) // 0'
+  cat "${@:-${HOME}/work.yaml}" | yq '([ .. | .Amount? | strings | capture("(?<amount>[0-9]+)") | .amount | tonumber] | add) // 0'
 }
 
 function work-hours-plot() {
-  cat "${@:-${HOME}/work.yaml}" | yaml2json - | jq -r 'map_values(((([."Home time",."Office time" | .Ranges | .[]? | .Duration | strings | ((capture("(?<amount>[0-9]+)m") | .amount | tonumber), (capture("(?<amount>[0-9]+)h") | .amount | tonumber | . * 60))]) | add // 0) / 60)) | to_entries | .[] | .key + " " + (.value | tostring)' | sort -n | gnuplot -p -e 'set xdata time; set timefmt "%Y-%m-%d"; set offset graph 0.05, 0.05, 0.05, 0.05; set xzeroaxis; set arrow 1 from graph 0,first 8 to graph 1,first 8 nohead; set title ""; plot "<cat" using 1:2 notitle'
+  cat "${@:-${HOME}/work.yaml}" | yq -r 'map_values(((([."Home time",."Office time" | .[]? | .Duration | strings | ((capture("(?<amount>[0-9]+)m") | .amount | tonumber), (capture("(?<amount>[0-9]+)h") | .amount | tonumber | . * 60))]) | add // 0) / 60)) | to_entries | .[] | (.key | tostring) + " " + (.value | tostring)' | sort -n | gnuplot -p -e 'set xdata time; set timefmt "%Y-%m-%d"; set format x "%m-%d"; set xlabel "Date (Month-Day)"; set ylabel "Work hours"; set offset graph 0.05, 0.05, 0.05, 0.05; set xzeroaxis; set arrow 1 from graph 0,first 8 to graph 1,first 8 nohead; set title ""; set boxwidth 5; set style fill solid; plot "<cat" using 1:2 notitle with boxes'
 }
 
 function work-expenses-plot() {
-  cat "${@:-${HOME}/work.yaml}" | yaml2json - | jq -r 'map_values(.. | .Amount? | (strings | capture("(?<amount>[0-9]+)") | .amount | tonumber) // 0) | to_entries | .[] | .key + " " + (.value | tostring)' | sort -n | gnuplot -p -e 'set xdata time; set timefmt "%Y-%m-%d"; set offset graph 0.05, 0.05, 0.05, 0.05; set xzeroaxis; set title ""; plot "<cat" using 1:2 notitle'
+  cat "${@:-${HOME}/work.yaml}" | yaml2json | jq -r 'map_values(.. | .Amount? | (strings | capture("(?<amount>[0-9]+)") | .amount | tonumber) // 0) | to_entries | .[] | .key + " " + (.value | tostring)' | sort -n | gnuplot -p -e 'set xdata time; set timefmt "%Y-%m-%d"; set offset graph 0.05, 0.05, 0.05, 0.05; set xzeroaxis; set title ""; plot "<cat" using 1:2 notitle'
 }
 
 alias ag-zalando-hostname="ag -ui '([a-z]([a-z0-9]*|[a-z0-9-]*[a-z0-9]+)\.)+(pp|zalan\.do|zalando\.([a-z][a-z][a-z]?|co\.[a-z][a-z])|zalando)\b\.?(?=[^.a-z0-9]|$)'"
@@ -1765,6 +1819,26 @@ function zias() {
 
 
 
+# Amazon
+
+export BRAZIL_WORKSPACE_DEFAULT_LAYOUT='short'
+export AUTO_TITLE_SCREENS='NO'
+
+alias bb='brazil-build'
+alias bba='brazil-build apollo-pkg'
+alias bre='brazil-runtime-exec'
+alias brc='brazil-recursive-cmd'
+alias bws='brazil ws'
+alias bwsuse='bws use --gitMode -p'
+alias bwscreate='bws create -n'
+alias brc='brazil-recursive-cmd'
+alias bbr='brc brazil-build'
+alias bball='brc --allPackages'
+alias bbb='brc --allPackages brazil-build'
+alias bbra='bbr apollo-pkg'
+
+
+
 zle -C all-matches complete-word _my_generic
 zstyle ':completion:all-matches::::' completer _all_matches
 zstyle ':completion:all-matches:*' old-matches only
@@ -1782,5 +1856,15 @@ eval $(thefuck --alias)
 if [ -z "${ZSH_COWSAY_DONE+1}" ]
 then
   export ZSH_COWSAY_DONE=1
-  fortune | cowsay -f elephant
+  fortune | cowsay -f elephant | lolcat
+fi
+
+
+
+if [[ -v devdesk ]]
+then
+  for alias_file in /apollo/env/AWSBillAdjustmentsCLIUtils/aliases/*
+  do
+    source "${alias_file}"
+  done
 fi
