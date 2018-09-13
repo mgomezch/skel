@@ -73,7 +73,7 @@ plugins=(
   nmap
   node
   npm
-  nyan
+  nyancat
   pep8
   perl
   pip
@@ -296,36 +296,6 @@ unsetopt VI
 
 
 
-# Completion configuration
-
-zstyle ':completion:*' completer _expand _complete _ignored _match _correct _approximate _prefix
-zstyle ':completion:*' expand prefix suffix
-zstyle ':completion:*' file-sort name
-zstyle ':completion:*' insert-unambiguous true
-zstyle ':completion:*' list-suffixes true
-zstyle ':completion:*' matcher-list '+' '+m:{[:lower:][:upper:]}={[:upper:][:lower:]}' '+r:|[._-]=* r:|=*' '+l:|=* r:|=*'
-zstyle ':completion:*' match-original only
-zstyle ':completion:*' max-errors 6 numeric
-zstyle ':completion:*' menu select=1
-zstyle ':completion:*' original false
-zstyle ':completion:*' verbose true
-
-if [[ -v devdesk ]]
-then
-  fpath=(
-    "$(readlink -f /apollo/env/AWSBillAdjustmentsCLIUtils/autocomplete)"
-    "${fpath[@]}"
-  )
-fi
-
-zstyle :compinstall filename "${HOME}/.zshrc"
-autoload -Uz compinit
-compinit -i
-
-command -v zkubectl > /dev/null && source <(zkubectl completion zsh)
-
-
-
 # History searching with PageUp/Down
 
 bindkey '^[[5~' history-beginning-search-backward
@@ -341,8 +311,10 @@ lib_new_paths=(); function lib_add_path() { [[ -d $1 ]] && lib_new_paths+=($1); 
 inc_new_paths=(); function inc_add_path() { [[ -d $1 ]] && inc_new_paths+=($1); }
 inf_new_paths=(); function inf_add_path() { [[ -d $1 ]] && inf_new_paths+=($1); }
 man_new_paths=(); function man_add_path() { [[ -d $1 ]] && man_new_paths+=($1); }
+com_new_paths=(); function com_add_path() { [[ -d $1 ]] && com_new_paths+=($1); }
 
 # Executable paths
+bin_add_path "/usr/local/opt/fzf/bin"
 bin_add_path "${HOME}/.rvm/bin"
 bin_add_path "${HOME}/.pyenv/bin"
 bin_add_path "${HOME}/.cargo/bin"
@@ -369,6 +341,11 @@ then
   done
 fi
 
+for brew_path in /usr/local/Cellar/*/*/{bin,libexec/gnubin}
+do
+  bin_add_path "${brew_path}"
+done
+
 # Library paths
 #lib_add_path "${HOME}/.nix-profile/lib"
 
@@ -381,12 +358,53 @@ inf_add_path "${HOME}/.nix-profile/share/info"
 # Manual paths
 man_add_path "${HOME}/.nix-profile/share/man"
 
+for brew_path in /usr/local/Cellar/*/*/{share/man,libexec/gnuman}
+do
+  man_add_path "${brew_path}"
+done
+
+# zsh completion paths
+com_add_path "${HOME}/.zsh/completion"
+com_add_path "$(readlink /apollo/env/AWSBillAdjustmentsCLIUtils/autocomplete)"
+
 export            PATH="$(IFS=':'; printf '%s' "${bin_new_paths[*]}"):${PATH}"
 export LD_LIBRARY_PATH="$(IFS=':'; printf '%s' "${lib_new_paths[*]}"):${LD_LIBRARY_PATH}"
 export     LD_RUN_PATH="$(IFS=':'; printf '%s' "${lib_new_paths[*]}"):${LD_RUN_PATH}"
 export  C_INCLUDE_PATH="$(IFS=':'; printf '%s' "${inc_new_paths[*]}"):${C_INCLUDE_PATH}"
 export        INFOPATH="$(IFS=':'; printf '%s' "${inf_new_paths[*]}"):${INFOPATH}"
 export         MANPATH="$(IFS=':'; printf '%s' "${man_new_paths[*]}"):${MANPATH}"
+
+
+
+# Completion configuration
+
+fpath=("${com_new_paths[@]}" "${fpath[@]}")
+
+zstyle ':completion:*' completer _expand _complete _ignored _match _correct _approximate _prefix
+zstyle ':completion:*' expand prefix suffix
+zstyle ':completion:*' file-sort name
+zstyle ':completion:*' insert-unambiguous true
+zstyle ':completion:*' list-suffixes true
+zstyle ':completion:*' matcher-list '+' '+m:{[:lower:][:upper:]}={[:upper:][:lower:]}' '+r:|[._-]=* r:|=*' '+l:|=* r:|=*'
+zstyle ':completion:*' match-original only
+zstyle ':completion:*' max-errors 6 numeric
+zstyle ':completion:*' menu select=1
+zstyle ':completion:*' original false
+zstyle ':completion:*' verbose true
+
+zstyle :compinstall filename "${HOME}/.zshrc"
+autoload -Uz compinit && compinit -i
+
+zle -C all-matches complete-word _my_generic
+zstyle ':completion:all-matches::::' completer _all_matches
+zstyle ':completion:all-matches:*' old-matches only
+_my_generic () {
+  local ZSH_TRACE_GENERIC_WIDGET=  # works with "setopt nounset"
+  _generic "$@"
+}
+bindkey '^X^a' all-matches
+
+command -v zkubectl > /dev/null && source <(zkubectl completion zsh)
 
 
 
@@ -414,7 +432,7 @@ function v1p() {
 
 command -v pyenv &>/dev/null && {
   eval "$(pyenv init -)"
-# eval "$(pyenv virtualenv-init -)"
+  eval "$(pyenv virtualenv-init -)"
 }
 
 command -v thefuck &>/dev/null && eval "$(thefuck --alias)"
@@ -1837,26 +1855,31 @@ alias bball='brc --allPackages'
 alias bbb='brc --allPackages brazil-build'
 alias bbra='bbr apollo-pkg'
 
-
-
-zle -C all-matches complete-word _my_generic
-zstyle ':completion:all-matches::::' completer _all_matches
-zstyle ':completion:all-matches:*' old-matches only
-_my_generic () {
-  local ZSH_TRACE_GENERIC_WIDGET=  # works with "setopt nounset"
-  _generic "$@"
+function cdb() {
+  cd ~/"stuff/code/repo/brazil/${1}"
 }
-bindkey '^X^a' all-matches
 
 
 eval $(thefuck --alias)
+
+[[ $- == *i* ]] && source '/usr/local/opt/fzf/shell/completion.zsh' 2> '/dev/null'
+source '/usr/local/opt/fzf/shell/key-bindings.zsh'
+
+alias ncdu='ncdu --color dark -rr -x'
+
+alias preview="fzf --preview 'bat --color \"always\" {}'"
 
 
 
 if [ -z "${ZSH_COWSAY_DONE+1}" ]
 then
   export ZSH_COWSAY_DONE=1
-  fortune | cowsay -f elephant | lolcat
+  if [[ $RANDOM -lt 16384 ]]
+  then
+    fortune | cowsay -f elephant | lolcat
+  else
+    fortune | ponysay --balloon unicode
+  fi
 fi
 
 
@@ -1868,3 +1891,6 @@ then
     source "${alias_file}"
   done
 fi
+
+export SDKMAN_DIR="${HOME}/.sdkman"
+[[ -s "${HOME}/.sdkman/bin/sdkman-init.sh" ]] && source "${HOME}/.sdkman/bin/sdkman-init.sh"

@@ -49,7 +49,6 @@ call dein#add('chrisbra/csv.vim')
 call dein#add('daviddavis/vim-colorpack')
 call dein#add('digitaltoad/vim-pug')
 call dein#add('edkolev/tmuxline.vim')
-call dein#add('edsono/vim-matchit')
 call dein#add('godlygeek/tabular')
 call dein#add('hail2u/vim-css3-syntax')
 call dein#add('jmcantrell/vim-virtualenv')
@@ -185,7 +184,8 @@ runtime ftplugin/man.vim
 
 " Options
 set background=dark
-set cryptmethod=blowfish2
+set backspace=indent,eol,start
+"set cryptmethod=blowfish2
 set expandtab
 set history=10000
 set hls
@@ -209,7 +209,7 @@ set ttimeout
 set ttimeoutlen=0
 
 set timeout
-set timeoutlen=100000000000000000
+"set timeoutlen=100000000000000000
 
 let g:netrw_altv = 1
 
