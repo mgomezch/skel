@@ -73,7 +73,6 @@ plugins=(
   nmap
   node
   npm
-  nyancat
   pep8
   perl
   pip
@@ -315,29 +314,33 @@ com_new_paths=(); function com_add_path() { [[ -d $1 ]] && com_new_paths+=($1); 
 
 # Executable paths
 bin_add_path "/usr/local/opt/fzf/bin"
-bin_add_path "${HOME}/.rvm/bin"
-bin_add_path "${HOME}/.pyenv/bin"
+bin_add_path "${HOME}/.opt/github/hub/bin"
+
 bin_add_path "${HOME}/.cargo/bin"
+bin_add_path "${HOME}/.pyenv/bin"
+bin_add_path "${HOME}/.rvm/bin"
+
 bin_add_path "${HOME}/bin"
 bin_add_path "${HOME}/stuff/bin"
 bin_add_path "${HOME}/stuff/commands"
+
+bin_add_path "${HOME}/.nix-profile/bin"
 bin_add_path "${HOME}/.cabal/bin"
-bin_add_path "${HOME}/.opt/github/hub/bin"
+
 bin_add_path "${HOME}/.toolbox/bin"
+bin_add_path '/apollo/env/AWSBillAdjustmentsCLIUtils'
 
 if [[ -v devdesk ]]
 then
   for apollo_environment in \
     SDETools \
     AmazonAwsCli \
+    BarkCLI \
     OdinTools \
-    AWSBillAdjustmentsCLIUtils \
+    envImprovement \
 
   do
-    if [[ -d "/apollo/env/${apollo_environment}" ]]
-    then
-      #bin_add_path "/apollo/env/${apollo_environment}/bin"
-    fi
+    bin_add_path "/apollo/env/${apollo_environment}/bin"
   done
 fi
 
@@ -1859,11 +1862,24 @@ function cdb() {
   cd ~/"stuff/code/repo/brazil/${1}"
 }
 
+function brazil() {
+  if [[ ${*:1:2} == "ws clone" ]]
+  then
+    command "${HOME}/.workspace/bin/workspace" --clone "${@:3}"
+  elif [[ ${*:1:2} == "ws checkout" ]]
+  then
+    command "${HOME}/.workspace/bin/workspace" --checkout "${@:3}"
+  else
+    command brazil "$@"
+  fi
+}
+
+
 
 eval $(thefuck --alias)
 
-[[ $- == *i* ]] && source '/usr/local/opt/fzf/shell/completion.zsh' 2> '/dev/null'
-source '/usr/local/opt/fzf/shell/key-bindings.zsh'
+[[ $- == *i* ]] && source_if_exists '/usr/local/opt/fzf/shell/completion.zsh' 2> '/dev/null'
+source_if_exists '/usr/local/opt/fzf/shell/key-bindings.zsh'
 
 alias ncdu='ncdu --color dark -rr -x'
 
@@ -1890,6 +1906,9 @@ then
   do
     source "${alias_file}"
   done
+
+  export DOCKER_HOST='unix:///var/run/docker.sock'
+  source_if_exists /etc/profile.d/docker_host.sh
 fi
 
 export SDKMAN_DIR="${HOME}/.sdkman"
