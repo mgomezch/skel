@@ -315,6 +315,7 @@ com_new_paths=(); function com_add_path() { [[ -d $1 ]] && com_new_paths+=($1); 
 # Executable paths
 bin_add_path "/usr/local/opt/fzf/bin"
 bin_add_path "${HOME}/.opt/github/hub/bin"
+bin_add_path "/Volumes/Unix/code/repo/brazil/EnvImprovement/env/BrazilRecursiveCmdParallel-1.0/runtime/bin"
 
 bin_add_path "${HOME}/.cargo/bin"
 bin_add_path "${HOME}/.pyenv/bin"
@@ -1857,6 +1858,49 @@ alias bbr='brc brazil-build'
 alias bball='brc --allPackages'
 alias bbb='brc --allPackages brazil-build'
 alias bbra='bbr apollo-pkg'
+alias brcp='brazil-recursive-cmd-parallel'
+alias bbrp='brcp brazil-build'
+alias bballp='brcp --allPackages'
+alias bbbp='brcp --allPackages brazil-build'
+
+function bgloga() {
+  (
+    cd "$(brazil ws show | sed -n 's/^ *Root: *//p')/src" &&
+    for package in *
+    do
+      (
+        cd "${package}" &&
+        {
+          printf '\n\n%*s\n' "${COLUMNS:-$(tput cols)}" '' \
+            | sed 's/./═/g'
+        } &&
+        echo "${package}" &&
+        gst &&
+        gloga --color | head -n 20
+      )
+    done
+  )
+}
+
+function bsync() {
+  bws sync -md &&
+  (
+    cd "$(brazil ws show | sed -n 's/^ *Root: *//p')/src" &&
+    parallel -j 6 'bash -c "cd {} && git fetch origin"' ::: * &&
+    for package in *
+    do
+      (
+        cd "${package}" &&
+        echo "${package}" &&
+        {
+          gp . origin/mainline:mainline ||
+          git merge --ff-only origin/mainline ||
+          true
+        }
+      )
+    done
+  )
+}
 
 function cdb() {
   cd ~/"stuff/code/repo/brazil/${1}"
@@ -1872,6 +1916,29 @@ function brazil() {
   else
     command brazil "$@"
   fi
+}
+
+function crr() {
+  for package_directory in "${workspace}"/src/*
+  do
+    package="$(basename "${package_directory}")"
+    (
+      cd "${package_directory}" &&
+      for commit in $(git rev-list origin/mainline..HEAD)
+      do
+        git log -1 --pretty='format:%b' "${commit}" | sed -ne "s@^ *cr https://code.amazon.com/reviews/\(CR-[0-9][0-9]*\)@\1 ${package} ${commit}@p"
+      done
+    )
+  done | ruby -e '
+    STDIN
+      .read
+      .lines
+      .map { |x| x.split }
+      .group_by { |cr, rest| cr }
+      .each { |cr, commits|
+        puts "REMOTE_TARGET_BRANCH=''mainline'' cr --include ''#{commits.map { |cr, package, commit| "#{package}[#{commit}~1:#{commit}]" }.join(",")}'' -r #{cr}"
+      }
+  '
 }
 
 
