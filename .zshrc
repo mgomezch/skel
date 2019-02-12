@@ -1869,14 +1869,23 @@ function bgloga() {
     for package in *
     do
       (
-        cd "${package}" &&
-        {
-          printf '\n\n%*s\n' "${COLUMNS:-$(tput cols)}" '' \
-            | sed 's/./═/g'
-        } &&
-        echo "${package}" &&
-        gst &&
-        gloga --color | head -n 20
+        cd "${package}" && {
+          {
+            git_status="$(git status --porcelain)"
+            [[
+              -z "${git_status}" &&
+              "$(git rev-parse origin/mainline)" == "$(git rev-parse HEAD)"
+            ]]
+          } || {
+            {
+              printf '\n\n%*s\n' "${COLUMNS:-$(tput cols)}" '' \
+                | sed 's/./═/g'
+            } &&
+            echo "${package}" &&
+            gst &&
+            gloga --color | head -n 20
+          }
+        }
       )
     done
   )
