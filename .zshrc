@@ -1870,21 +1870,24 @@ function bgloga() {
     do
       (
         cd "${package}" && {
-          {
-            git_status="$(git status --porcelain)"
+          function up_to_date() {
             [[
-              -z "${git_status}" &&
+              -z "$(git status --porcelain)" &&
               "$(git rev-parse origin/mainline)" == "$(git rev-parse HEAD)"
             ]]
-          } || {
-            {
-              printf '\n\n%*s\n' "${COLUMNS:-$(tput cols)}" '' \
-                | sed 's/./═/g'
-            } &&
-            echo "${package}" &&
-            gst &&
-            gloga --color | head -n 20
           }
+          function on_mainline() {
+            [[ "$(git symbolic-ref --short HEAD)" == 'mainline' ]]
+          }
+          if ! up_to_date || ! on_mainline
+          then
+            printf '\n\n%*s\n' "${COLUMNS:-$(tput cols)}" '' \
+              | sed 's/./═/g' \
+              &&
+            printf '%s\n\n' "${package}"
+          fi
+          if ! on_mainline; then gst; fi
+          if ! up_to_date; then gloga --color | head -n 20; fi
         }
       )
     done
@@ -1927,7 +1930,12 @@ function brazil() {
   fi
 }
 
-function crr() {
+function crn() {
+  workspace="$(
+    brazil workspace show \
+      | sed -ne 's/ *Root: *//p' \
+      | ruby -pe '$_.delete_prefix `pwd`'
+  )"
   for package_directory in "${workspace}"/src/*
   do
     package="$(basename "${package_directory}")"
@@ -1935,7 +1943,39 @@ function crr() {
       cd "${package_directory}" &&
       for commit in $(git rev-list origin/mainline..HEAD)
       do
-        git log -1 --pretty='format:%b' "${commit}" | sed -ne "s@^ *cr https://code.amazon.com/reviews/\(CR-[0-9][0-9]*\)@\1 ${package} ${commit}@p"
+        git branch \
+          --format '%(refname:short)' \
+          --points-at "${commit}" \
+          | sed -ne "s@.*@& ${package} ${commit}@p"
+      done
+    )
+  done | ruby -e '
+    STDIN
+      .read
+      .lines
+      .map { |x| x.split }
+      .group_by { |branch, rest| branch }
+      .each { |branch, commits|
+        puts "REMOTE_TARGET_BRANCH=''mainline'' cr --include ''#{commits.map { |branch, package, commit| "#{package}[#{commit}~1:#{commit}]" }.join(",")}'' --new-review"
+      }
+  '
+}
+
+function crr() {
+  workspace="$(
+    brazil workspace show \
+      | sed -ne 's/ *Root: *//p' \
+      | ruby -pe '$_.delete_prefix `pwd`'
+  )"
+  for package_directory in "${workspace}"/src/*
+  do
+    package="$(basename "${package_directory}")"
+    (
+      cd "${package_directory}" &&
+      for commit in $(git rev-list origin/mainline..HEAD)
+      do
+        git log -1 --pretty='format:%b' "${commit}" \
+          | sed -ne "s@^ *cr https://code.amazon.com/reviews/\(CR-[0-9][0-9]*\)@\1 ${package} ${commit}@p"
       done
     )
   done | ruby -e '
