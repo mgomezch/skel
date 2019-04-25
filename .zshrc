@@ -345,10 +345,13 @@ then
   done
 fi
 
-for brew_path in /usr/local/Cellar/*/*/{bin,libexec/gnubin}
-do
-  bin_add_path "${brew_path}"
-done
+if [[ -d '/usr/local/Cellar' ]]
+then
+  for brew_path in /usr/local/Cellar/*/*/{bin,libexec/gnubin}
+  do
+    bin_add_path "${brew_path}"
+  done
+fi
 
 # Library paths
 #lib_add_path "${HOME}/.nix-profile/lib"
@@ -362,10 +365,13 @@ inf_add_path "${HOME}/.nix-profile/share/info"
 # Manual paths
 man_add_path "${HOME}/.nix-profile/share/man"
 
-for brew_path in /usr/local/Cellar/*/*/{share/man,libexec/gnuman}
-do
-  man_add_path "${brew_path}"
-done
+if [[ -d '/usr/local/Cellar' ]]
+then
+  for brew_path in /usr/local/Cellar/*/*/{share/man,libexec/gnuman}
+  do
+    man_add_path "${brew_path}"
+  done
+fi
 
 # zsh completion paths
 com_add_path "${HOME}/.zsh/completion"
@@ -1894,8 +1900,7 @@ function bgloga() {
   )
 }
 
-function bsync() {
-  bws sync -md &&
+function gsync() {
   (
     cd "$(brazil ws show | sed -n 's/^ *Root: *//p')/src" &&
     parallel -j 6 'bash -c "cd {} && git fetch origin"' ::: * &&
@@ -1912,6 +1917,10 @@ function bsync() {
       )
     done
   )
+}
+
+function bsync() {
+  bws sync -md && gsync
 }
 
 function cdb() {
@@ -1931,14 +1940,14 @@ function brazil() {
 }
 
 function crn() {
-  workspace="$(
+  local workspace="$(
     brazil workspace show \
       | sed -ne 's/ *Root: *//p' \
       | ruby -pe '$_.delete_prefix `pwd`'
   )"
   for package_directory in "${workspace}"/src/*
   do
-    package="$(basename "${package_directory}")"
+    local package="$(basename "${package_directory}")"
     (
       cd "${package_directory}" &&
       for commit in $(git rev-list origin/mainline..HEAD)
@@ -1956,20 +1965,20 @@ function crn() {
       .map { |x| x.split }
       .group_by { |branch, rest| branch }
       .each { |branch, commits|
-        puts "REMOTE_TARGET_BRANCH=''mainline'' cr --include ''#{commits.map { |branch, package, commit| "#{package}[#{commit}~1:#{commit}]" }.join(",")}'' --new-review"
+        puts "REMOTE_TARGET_BRANCH=''mainline'' cr --include ''#{commits.map { |branch, package, commit| "#{package}[#{commit}~1:#{commit}]" }.join(",")}'' --new-review # #{branch}"
       }
   '
 }
 
 function crr() {
-  workspace="$(
+  local workspace="$(
     brazil workspace show \
       | sed -ne 's/ *Root: *//p' \
       | ruby -pe '$_.delete_prefix `pwd`'
   )"
   for package_directory in "${workspace}"/src/*
   do
-    package="$(basename "${package_directory}")"
+    local package="$(basename "${package_directory}")"
     (
       cd "${package_directory}" &&
       for commit in $(git rev-list origin/mainline..HEAD)
@@ -1988,6 +1997,50 @@ function crr() {
         puts "REMOTE_TARGET_BRANCH=''mainline'' cr --include ''#{commits.map { |cr, package, commit| "#{package}[#{commit}~1:#{commit}]" }.join(",")}'' -r #{cr}"
       }
   '
+}
+
+function whitelisting() {
+  service="${1}"
+  shift
+  (
+    cdb AWSPricingDynamicConfig/src/AWSPricingDynamicConfig
+    jq -c '
+      .[]
+      | .stages[] as $stage
+      | .accounts[] as $account
+      | {stage: $stage, account: $account}
+    ' <<< "${1}" \
+      | while read data
+        do
+          stage="$(jq -r '.stage' <<< "${data}")"
+          account="$(jq -r '.account' <<< "${data}")"
+          < "dynamic-config/${service}/${service}-Whitelist-${stage}.json" \
+            grep -v '//' \
+            | \
+              account="${account}" \
+              stage="${stage}" \
+              jq -cr '
+                {
+                  stage: env.stage,
+                  account: env.account,
+                  apis: [
+                    to_entries[]
+                    | select(
+                      (env.account != "")
+                      and (.value[] | contains(env.account))
+                    ).key
+                  ] | sort
+                }
+                | [
+                  .stage,
+                  .account,
+                  (.apis | join(" "))
+                ]
+                | @tsv
+              '
+        done \
+      | column -t
+  )
 }
 
 
