@@ -1772,7 +1772,7 @@ function work-expenses() {
 }
 
 function work-hours-plot() {
-  cat "${@:-${HOME}/work.yaml}" | yq -r 'map_values(((([."Home time",."Office time" | .[]? | .Duration | strings | ((capture("(?<amount>[0-9]+)m") | .amount | tonumber), (capture("(?<amount>[0-9]+)h") | .amount | tonumber | . * 60))]) | add // 0) / 60)) | to_entries | .[] | (.key | tostring) + " " + (.value | tostring)' | sort -n | gnuplot -p -e 'set xdata time; set timefmt "%Y-%m-%d"; set format x "%m-%d"; set xlabel "Date (Month-Day)"; set ylabel "Work hours"; set offset graph 0.05, 0.05, 0.05, 0.05; set xzeroaxis; set arrow 1 from graph 0,first 8 to graph 1,first 8 nohead; set title ""; set boxwidth 5; set style fill solid; plot "<cat" using 1:2 notitle with boxes'
+  cat "${@:-${HOME}/work.yaml}" | yq -r 'map_values(((([."Home time",."Office time" | .[]? | .Duration | strings | ((capture("(?<amount>[0-9]+)m") | .amount | tonumber), (capture("(?<amount>[0-9]+)h") | .amount | tonumber | . * 60))]) | add // 0) / 60)) | to_entries | .[] | (.key | tostring) + " " + (.value | tostring)' | sort -n | gnuplot -p -e 'set xdata time; set timefmt "%Y-%m-%d"; set format x "%m-%d"; set xlabel "Date (Month-Day)"; set ylabel "Work hours"; set offset graph 0.05, 0.05, 0.05, 0.05; set xzeroaxis; set arrow 1 from graph 0,first 8 to graph 1,first 8 nohead; set title ""; set boxwidth 5; set style fill solid; set yrange [0:*]; unset mxtics; set xtics 86400; plot "<cat" using 1:2 notitle with boxes'
 }
 
 function work-expenses-plot() {
@@ -2041,6 +2041,56 @@ function whitelisting() {
         done \
       | column -t
   )
+}
+
+function deploy-dynamic-config() {
+  config="${1}"; shift
+  stage="${1}"; shift
+  service="${1}"; shift
+  ticket="${1}"; shift
+  commit="${1}"; shift
+  /apollo/env/GraniteSimpleConfigCLI/bin/configcli.sh \
+    put \
+    -m "manifest-${stage}.json" \
+    -n "${service}-${config}-${stage}" \
+    -v "${commit}" \
+    -c "https://t.corp.amazon.com/${ticket}"
+}
+
+function whitelist() {
+  deploy-dynamic-config 'Whitelist' "${@}"
+}
+
+function whitelist-nonprod() {
+  for stage in {alpha,beta}-integ gamma-iad
+  do
+    whitelist "${stage}" "${@}"
+  done
+}
+
+function whitelist-prod() {
+  for stage in prod-iad
+  do
+    whitelist "${stage}" "${@}"
+  done
+}
+
+function throttling() {
+  deploy-dynamic-config 'Whitelist' "${@}"
+}
+
+function throttle-nonprod() {
+  for stage in {alpha,beta}-integ gamma-iad
+  do
+    throttle "${stage}" "${@}"
+  done
+}
+
+function throttle-prod() {
+  for stage in prod-iad
+  do
+    throttle "${stage}" "${@}"
+  done
 }
 
 
