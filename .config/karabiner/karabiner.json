@@ -1,5 +1,6 @@
 {
     "global": {
+        "ask_for_confirmation_before_quitting": true,
         "check_for_updates_on_startup": true,
         "show_in_menu_bar": true,
         "show_profile_name_in_menu_bar": false,
@@ -17,9 +18,61 @@
                 },
                 "rules": [
                     {
+                        "description": "COOIDEA USB volume control",
+                        "manipulators": [
+                            {
+                                "conditions": [
+                                    {
+                                        "identifiers": [
+                                            {
+                                                "is_keyboard": true,
+                                                "is_pointing_device": false,
+                                                "product_id": 7658,
+                                                "vendor_id": 49153
+                                            }
+                                        ],
+                                        "type": "device_if"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "mute",
+                                    "modifiers": {
+                                        "optional": [
+                                            "any"
+                                        ]
+                                    }
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "m",
+                                        "modifiers": [
+                                            "left_command",
+                                            "left_control",
+                                            "left_option"
+                                        ]
+                                    }
+                                ],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
                         "description": "SteelSeries Apex RAW",
                         "manipulators": [
                             {
+                                "conditions": [
+                                    {
+                                        "identifiers": [
+                                            {
+                                                "is_keyboard": true,
+                                                "is_pointing_device": false,
+                                                "product_id": 8195,
+                                                "vendor_id": 4809
+                                            }
+                                        ],
+                                        "type": "device_if"
+                                    }
+                                ],
                                 "from": {
                                     "key_code": "a",
                                     "modifiers": {
@@ -33,13 +86,15 @@
                                         "key_code": "left_arrow",
                                         "modifiers": [
                                             "left_command",
-                                        "left_control"
+                                            "left_control"
                                         ]
                                     }
                                 ],
+                                "type": "basic"
+                            },
+                            {
                                 "conditions": [
                                     {
-                                        "type": "device_if",
                                         "identifiers": [
                                             {
                                                 "is_keyboard": true,
@@ -47,12 +102,10 @@
                                                 "product_id": 8195,
                                                 "vendor_id": 4809
                                             }
-                                        ]
+                                        ],
+                                        "type": "device_if"
                                     }
                                 ],
-                                "type": "basic"
-                            },
-                            {
                                 "from": {
                                     "key_code": "d",
                                     "modifiers": {
@@ -66,20 +119,7 @@
                                         "key_code": "right_arrow",
                                         "modifiers": [
                                             "left_command",
-                                        "left_control"
-                                        ]
-                                    }
-                                ],
-                                "conditions": [
-                                    {
-                                        "type": "device_if",
-                                        "identifiers": [
-                                            {
-                                                "is_keyboard": true,
-                                                "is_pointing_device": false,
-                                                "product_id": 8195,
-                                                "vendor_id": 4809
-                                            }
+                                            "left_control"
                                         ]
                                     }
                                 ],
@@ -571,21 +611,21 @@
                     "simple_modifications": [
                         {
                             "from": {
-                                "key_code": "w"
-                            },
-                            "to": [
-                                {
-                                    "apple_vendor_keyboard_key_code": "mission_control"
-                                }
-                            ]
-                        },
-                        {
-                            "from": {
                                 "key_code": "s"
                             },
                             "to": [
                                 {
                                     "key_code": "escape"
+                                }
+                            ]
+                        },
+                        {
+                            "from": {
+                                "key_code": "w"
+                            },
+                            "to": [
+                                {
+                                    "apple_vendor_keyboard_key_code": "mission_control"
                                 }
                             ]
                         }
@@ -603,6 +643,34 @@
                     },
                     "ignore": true,
                     "manipulate_caps_lock_led": false,
+                    "simple_modifications": [],
+                    "treat_as_built_in_keyboard": false
+                },
+                {
+                    "disable_built_in_keyboard_if_exists": false,
+                    "fn_function_keys": [],
+                    "identifiers": {
+                        "is_keyboard": true,
+                        "is_pointing_device": false,
+                        "product_id": 7658,
+                        "vendor_id": 49153
+                    },
+                    "ignore": false,
+                    "manipulate_caps_lock_led": true,
+                    "simple_modifications": [],
+                    "treat_as_built_in_keyboard": false
+                },
+                {
+                    "disable_built_in_keyboard_if_exists": false,
+                    "fn_function_keys": [],
+                    "identifiers": {
+                        "is_keyboard": true,
+                        "is_pointing_device": false,
+                        "product_id": 4614,
+                        "vendor_id": 4152
+                    },
+                    "ignore": false,
+                    "manipulate_caps_lock_led": true,
                     "simple_modifications": [],
                     "treat_as_built_in_keyboard": false
                 }
